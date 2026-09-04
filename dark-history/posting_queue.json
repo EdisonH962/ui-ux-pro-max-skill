@@ -1,0 +1,125 @@
+{
+  "_comment": "Warteschlange fuer den taeglichen TikTok-Posting-Trigger (@coldfacts71). Jeder Eintrag ist ein fertig gerendertes, aber noch nicht gepostetes Video. Der taegliche Trigger (00:00 UTC = 02:00 CEST, US-Ostkueste-Primetime) nimmt den ERSTEN Eintrag mit status='pending', postet ihn via tiktok_prepare_publish + tiktok_publish + tiktok_publish_status, setzt status auf 'posted' und traegt publish_id + posted_at ein. connector_id fuer @coldfacts71: ee2623ee-62e9-4b20-9883-60effd5b52b8. Publish-Settings immer identisch: mode DIRECT_POST, privacy PUBLIC_TO_EVERYONE, allow_comment/duet/stitch true, is_aigc true, commercial_content_disclosure enabled=false, music_sound_volume 15, video_original_sound_volume 100.",
+  "queue": [
+    {
+      "script": "16 - Jack the Ripper: The Letters (1888)",
+      "status": "pending",
+      "video_url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3G8m1bxNBqhjlyBCY2gFUlzpzbo/6d7769e4-5b64-4fe3-8a87-71734d65c39c.mp4",
+      "title": "Jack the Ripper 1888 — He signed his own name in a letter to police. #darkhistory #jacktheripper #truestory",
+      "music_sound_id": "6595184426152364801",
+      "duration_sec": 80.6
+    },
+    {
+      "script": "17 - The Ship That Never Came: Titanic/Californian (1912)",
+      "status": "pending",
+      "video_url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3G8m1bxNBqhjlyBCY2gFUlzpzbo/fba64b59-80f9-4f2f-8bd9-8e9d90067121.mp4",
+      "title": "Titanic 1912 — Another ship was close enough to see her sinking. It did nothing. #darkhistory #titanic #truestory",
+      "music_sound_id": "6739957724429158401",
+      "duration_sec": 66.5
+    },
+    {
+      "script": "18 - Curse of Tutankhamun (1922)",
+      "status": "pending",
+      "video_url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3G8m1bxNBqhjlyBCY2gFUlzpzbo/2d099eff-96c4-4562-bacb-42aafd4caaad.mp4",
+      "title": "Tutankhamun 1922 — They opened the tomb in November. By April the man who paid for it was dead. #darkhistory #tutankhamun #mystery",
+      "music_sound_id": "6739976214024292354",
+      "duration_sec": 88.28
+    },
+    {
+      "script": "19 - Amelia Earhart (1937)",
+      "status": "pending",
+      "video_url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3G8m1bxNBqhjlyBCY2gFUlzpzbo/4cb9cbfc-4c33-4457-a8d5-4371935b1953.mp4",
+      "title": "Amelia Earhart 1937 — Her last transmission was fragmented. Then nothing. #darkhistory #ameliaearhart #mystery",
+      "music_sound_id": "6859381931478353922",
+      "duration_sec": 76.5
+    },
+    {
+      "script": "20 - Rasputin: What the Autopsy Said (1916)",
+      "status": "pending",
+      "video_url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3G8m1bxNBqhjlyBCY2gFUlzpzbo/050ffef8-54bf-4cfe-b006-5ce3c8957eb1.mp4",
+      "title": "Rasputin 1916 — The famous story says poison. The autopsy says otherwise. #darkhistory #rasputin #truestory",
+      "music_sound_id": "6577640999927941893",
+      "duration_sec": 81.5
+    },
+    {
+      "script": "21 - The Hindenburg (1937)",
+      "status": "pending",
+      "video_url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3G8m1bxNBqhjlyBCY2gFUlzpzbo/54b0ec8a-eba4-4753-932f-37e9a2bc4de2.mp4",
+      "title": "The Hindenburg 1937 — It burned in thirty-two seconds. Nobody agrees on why. #darkhistory #hindenburg #mystery",
+      "music_sound_id": "6783960728287053825",
+      "duration_sec": 62.28
+    },
+    {
+      "script": "22 - The Woman Who Claimed to Be Anastasia (1920)",
+      "status": "pending",
+      "video_url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3G8m1bxNBqhjlyBCY2gFUlzpzbo/62dbbf55-975b-4b91-95bb-8ff4cf607603.mp4",
+      "title": "Anastasia 1920 — For sixty years she said she was the Tsar's daughter. #darkhistory #anastasia #truestory",
+      "music_sound_id": "6886943025189095425",
+      "duration_sec": 85.5
+    },
+    {
+      "script": "23 - Flight 19 (1945)",
+      "status": "pending",
+      "video_url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3G8m1bxNBqhjlyBCY2gFUlzpzbo/ae0173e8-c9e0-474f-8bb7-800cb94c0b91.mp4",
+      "title": "Flight 19 1945 — Five planes vanished. Then the rescue plane vanished too. #darkhistory #flight19 #mystery",
+      "music_sound_id": "6739980818015324161",
+      "duration_sec": 81.5
+    },
+    {
+      "script": "24 - Lizzie Borden (1892)",
+      "status": "pending",
+      "video_url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3G8m1bxNBqhjlyBCY2gFUlzpzbo/148f16bb-9266-4a90-a3af-d9961e47c992.mp4",
+      "title": "Lizzie Borden 1892 — The jury took an hour to acquit her. Nobody else was ever charged. #darkhistory #lizzieborden #truecrime",
+      "music_sound_id": "6595184426152364801",
+      "duration_sec": 84.0
+    },
+    {
+      "script": "25 - The Lost Colony of Roanoke (1587)",
+      "status": "pending",
+      "video_url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3G8m1bxNBqhjlyBCY2gFUlzpzbo/6e891a91-4589-4c15-8a60-f2c92fbc144e.mp4",
+      "title": "Roanoke 1587 — He came back with supplies. All hundred and fifteen people were gone. #darkhistory #roanoke #mystery",
+      "music_sound_id": "6739957724429158401",
+      "duration_sec": 74.38
+    },
+    {
+      "script": "26 - Pompeii: The Warning Nobody Read (79 AD)",
+      "status": "pending",
+      "video_url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3G8m1bxNBqhjlyBCY2gFUlzpzbo/857e77d1-65e6-4bff-ad88-ca6311f1464e.mp4",
+      "title": "Pompeii 79 AD — The city was destroyed by a mountain it did not know was a volcano. #darkhistory #pompeii #history",
+      "music_sound_id": "6739976214024292354",
+      "duration_sec": 80.6
+    },
+    {
+      "script": "27 - H. H. Holmes: The Castle That Wasn't (1893)",
+      "status": "pending",
+      "video_url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3G8m1bxNBqhjlyBCY2gFUlzpzbo/3f9165b2-bef4-4e51-b711-4814df49a07f.mp4",
+      "title": "H. H. Holmes 1893 — He confessed to twenty-seven murders. Several victims turned up alive. #darkhistory #hhholmes #truecrime",
+      "music_sound_id": "6859381931478353922",
+      "duration_sec": 83.6
+    },
+    {
+      "script": "28 - The Bell Witch (1817)",
+      "status": "pending",
+      "video_url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3G8m1bxNBqhjlyBCY2gFUlzpzbo/5ab2fec6-3807-4379-9557-5b7d151ffc27.mp4",
+      "title": "The Bell Witch 1817 — A Tennessee family said something invisible lived in their house for four years. #darkhistory #bellwitch #mystery",
+      "music_sound_id": "6577640999927941893",
+      "duration_sec": 72.28
+    },
+    {
+      "script": "29 - The Winchester House (1884)",
+      "status": "pending",
+      "video_url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3G8m1bxNBqhjlyBCY2gFUlzpzbo/1ec7de69-93a9-4261-a483-92f7bdf72ecb.mp4",
+      "title": "Winchester House 1884 — She built a house for thirty-eight years and never stopped. #darkhistory #winchestermystery #mystery",
+      "music_sound_id": "6783960728287053825",
+      "duration_sec": 76.5
+    },
+    {
+      "script": "30 - The Antikythera Mechanism (1901)",
+      "status": "pending",
+      "video_url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3G8m1bxNBqhjlyBCY2gFUlzpzbo/3f066e90-7d5c-452c-9f34-6f053335f248.mp4",
+      "title": "Antikythera Mechanism 1901 — Divers found a lump of corroded bronze. It was a two-thousand-year-old computer. #darkhistory #antikythera #ancienthistory",
+      "music_sound_id": "6886943025189095425",
+      "duration_sec": 76.5
+    }
+  ]
+}
