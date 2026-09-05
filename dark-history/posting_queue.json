@@ -3,11 +3,13 @@
   "queue": [
     {
       "script": "16 - Jack the Ripper: The Letters (1888)",
-      "status": "pending",
+      "status": "posted",
       "video_url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3G8m1bxNBqhjlyBCY2gFUlzpzbo/6d7769e4-5b64-4fe3-8a87-71734d65c39c.mp4",
       "title": "Jack the Ripper 1888 — He signed his own name in a letter to police. #darkhistory #jacktheripper #truestory",
       "music_sound_id": "6595184426152364801",
-      "duration_sec": 80.6
+      "duration_sec": 80.6,
+      "publish_id": "v_pub_url~v2.7681931259106363425",
+      "posted_at": "2026-09-05T00:07:00Z"
     },
     {
       "script": "17 - The Ship That Never Came: Titanic/Californian (1912)",
