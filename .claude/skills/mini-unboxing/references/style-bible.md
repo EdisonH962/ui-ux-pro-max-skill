@@ -172,7 +172,7 @@ A power or screen tell says the product has current. A loop tell says it *works*
 
 **It is plumbed, not implied.** A console needs a visible display cable running from its port to the back of the miniature screen, connected on camera or already connected in an earlier shot. A screen glowing beside an unconnected console reads as two separate props sharing a table. The controller and the cable are accessories like any other and need their earlier reveal (§Object provenance rule); the display itself is the one exception — it is set dressing, standing on the table from the first shot, never unboxed.
 
-**Two beats, and you pay for them.** One shot brings the screen alive, the next shows input and answer. In a six-beat reel that is a third of the runtime, so two unboxing beats have to go. Worth it, but decide it deliberately rather than bolting it on.
+**Two beats, and you pay for them.** One shot brings the screen alive, the next shows input and answer. In a six-beat reel that is a third of the runtime, so two unboxing beats have to go. Worth it, but decide it deliberately rather than bolting it on. The cost comes from having to establish a separate display: when the screen is part of the product — a handheld console, a phone, a camera back — there is nothing to plumb and the whole loop fits in one shot, thumb and screen already sharing the frame.
 
 **Input and response share one frame.** A thumb pressing in one shot and the car turning in the next is not a loop — it is two unrelated clips, and the causality the shot exists for is gone. Frame the controller and the screen together and let the picture react while the thumb is still down.
 
@@ -181,6 +181,24 @@ A power or screen tell says the product has current. A loop tell says it *works*
 **The scale risk doubles here.** A held controller is where the model's priors pull hardest toward normal size (§Scale continuity anchor), and this frame holds two such objects at once. Give the controller its own comparator, keep contact fingertip-only, and restate the product's comparator in the same sentence.
 
 **The tell before it becomes setup.** When a loop tell is in the reel it is the payoff, so the plug-in or power-on that precedes it is demoted to preparation: keep it brief, no held beat, no lingering. A tell may be downgraded to setup when a bigger one follows — two equal climaxes still are not allowed.
+
+### Product classes — which tell belongs to what
+
+Never pick the tell by taste; pick it by what the product is. Read the class off the product, take the tell in its row, and note the extra objects that class needs on the table before the shot list is written.
+
+| Product class | Default hero tell | Set needs beyond the box | Watch for |
+|---|---|---|---|
+| Home console | Loop tell (two beats) | a display standing on the table from shot 1, a display cable, a controller out of the box | the cable must be visibly plumbed; the display is never unboxed |
+| Handheld console | Loop tell (one beat) | nothing, the screen is on the device | easiest loop of all — thumb and screen already share the frame |
+| Phone / tablet | Loop tell (one beat) | nothing | its interface is all text; use motion content only, never a menu or a home screen of labelled icons |
+| Drone | Motion tell | nothing | propellers turning half a rotation beat a lit logo, because only a drone can do it |
+| Camera | Motion tell (a lens extending) or screen tell (the rear display waking) | nothing | pick the lens if the model has one that moves |
+| Earbuds, clamshell devices | Wake tell | nothing | the lid alone triggers it — never show a button being pressed |
+| Speaker, power bank, charger | Power tell | the charging cable, revealed from the box first | |
+| Laptop | Screen tell, fired by the lid opening | nothing | the hinge is also the reel's best micro-reaction |
+| Anything unpowered — sneaker, bag, perfume, watch, figure, trading cards | none | nothing | see below |
+
+**Unpowered products have no tell, and faking one ruins them.** A sneaker does not light up. For these the hero moment is mechanical instead: the single most satisfying physical action the object can perform — a perfume cap popping off its collar, a lace pulling through an eyelet and drawing tight, a watch clasp snapping shut, a card sliding free of its sleeve, a magnetic closure pulling itself the last millimetre. Treat it exactly like a tell: exactly one per reel, the longest beat, held afterwards. Everything else in §Interaction tells applies unchanged except the persistence rule, which has nothing to persist.
 
 ### At least two micro-reactions, spread across the reel
 
