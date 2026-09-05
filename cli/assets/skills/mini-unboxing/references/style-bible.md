@@ -130,7 +130,15 @@ Tweezers set each remaining accessory down in a line — cable, adapter, manual 
 `Close macro three-quarter angle.`
 Two fingertips on each piece bring them together — fingertip contact only, never a full-hand grip — a visible snap or seat completes the join, fingertips withdraw. Restate the comparator (§Scale continuity anchor) in this shot's sentence; grip shots are where scale drifts most.
 
-**8 HERO STAND / DETAIL PASS** · mandatory, always the last shot · 1.5-2.5 s
+**8 CABLE PLUG-IN / POWER TELL** · when the product has a visible port and ships with a cable · 2.0-2.5 s
+`Tight macro on the port side of the product, the port centred in frame.`
+Two fingertips bring the plug in from the right, its cable trailing out of frame. The tip touches down beside the port, corrects a fraction, then slides in and seats with a small visible shift as the housing meets the shell. At that exact instant the product's own light — a logo panel, an indicator row, a power ring — lights up, the glow building over a breath rather than snapping on, spilling faintly onto the fingertip beside it and onto the grain of the tabletop below. Fingertips release the plug and withdraw right, the cable left hanging, the light holding steady.
+
+The cable is the excuse; the light is the shot. A dead miniature that suddenly responds is what makes a viewer watch twice, so this is worth the longest running time in the reel. Three details carry it and none are optional: the **fractional correction** before the plug lands (nobody hits a port first try, and a clean hit reads as animation), the **glow building rather than snapping on** (an instant switch reads as a game overlay, a rise reads as electronics), and the **light spilling onto the fingertip** (light that never touches the hand reads as pasted on). Give the connector its own comparator alongside the product's — `the connector no wider than a grain of rice`.
+
+**The light stays on.** Once this shot has fired, every later shot must restate that the light is still there (`its logo panel still lit`, `the power ring still glowing`). A light that quietly goes out on the next hard cut throws the whole beat away. The cable must also have come from somewhere: like any accessory it needs an earlier TRAY / LINER PULL showing it in the box (§Object provenance rule).
+
+**9 HERO STAND / DETAIL PASS** · mandatory, always the last shot · 1.5-2.5 s
 `Static 45-degree hero close-up.`
 The assembled product stands or rests on the tabletop; if it's touched at all, only two fingertips pinch it lightly to tilt it — never a whole-hand hold — to catch the light across a signature detail (port, seam, sole, logo). Restate the comparator here too. Ends on a held static beat — never a new camera position.
 
@@ -171,7 +179,7 @@ Tools: `fine-tipped tweezers` — near-default, used for every fine unwrapping/e
 
 Diegetic only, ordered to match the shot list. Draw from real per-archetype sounds, never a generic "unboxing sounds":
 
-`the blade slicing through tape` · `the box lid creaking open` · `plastic film peeling back` · `the tray sliding out of the box` · `tweezers clicking against the blister pack` · `a small cable setting down on wood` · `two plastic parts snapping together` · `the product settling onto the tabletop`.
+`the blade slicing through tape` · `the box lid creaking open` · `plastic film peeling back` · `the tray sliding out of the box` · `tweezers clicking against the blister pack` · `a small cable setting down on wood` · `a plug seating with a soft click` · `a faint electronic power-on chime` · `two plastic parts snapping together` · `the product settling onto the tabletop`.
 
 ---
 
