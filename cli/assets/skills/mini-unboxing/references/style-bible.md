@@ -158,12 +158,29 @@ The single moment the product comes alive on its own. Pick exactly one, match it
 | **Screen tell** | a display wakes from black, a boot logo or indicator builds and fills it | console, phone, camera, monitor, handheld |
 | **Motion tell** | something moves with no hand on it — propellers turn a half rotation, a disc tray slides out, a gimbal self-levels, a lens extends | drone, console, camera, anything motorised |
 | **Wake tell** | the lid alone opens and the product responds unprompted, no button pressed | earbud case, clamshell devices, anything with a sensor |
+| **Loop tell** | the hand works a controller or remote and the screen answers inside the same frame | console plus display, TV plus remote, handheld console |
 
 Prefer the tell that only this product could do. A logo lighting up is available to everything; propellers turning belong to a drone alone, and the specific one always reads stronger.
 
 **Two hero tells cancel each other out.** In ten seconds there is room for one moment the viewer replays. A reel where the device charges *and* boots *and* spins has no such moment — it reads as a product advert. One tell, properly held, beats three rushed ones.
 
 **The state persists.** Whatever the tell changed — a lit panel, a woken screen, an extended lens — every later shot must restate it (`its logo panel still lit`, `the screen still glowing`). A state that quietly reverts on the next hard cut throws the beat away. Archetype 8 restates this for the plug-in case.
+
+### The loop tell — strongest of the five, and the only one that costs two beats
+
+A power or screen tell says the product has current. A loop tell says it *works*, which is the claim this whole niche is implicitly making, so it lands harder than the other four. It also carries more ways to fail, and all five conditions below are load-bearing.
+
+**It is plumbed, not implied.** A console needs a visible display cable running from its port to the back of the miniature screen, connected on camera or already connected in an earlier shot. A screen glowing beside an unconnected console reads as two separate props sharing a table. The controller and the cable are accessories like any other and need their earlier reveal (§Object provenance rule); the display itself is the one exception — it is set dressing, standing on the table from the first shot, never unboxed.
+
+**Two beats, and you pay for them.** One shot brings the screen alive, the next shows input and answer. In a six-beat reel that is a third of the runtime, so two unboxing beats have to go. Worth it, but decide it deliberately rather than bolting it on.
+
+**Input and response share one frame.** A thumb pressing in one shot and the car turning in the next is not a loop — it is two unrelated clips, and the causality the shot exists for is gone. Frame the controller and the screen together and let the picture react while the thumb is still down.
+
+**Nothing on screen may depend on readable text.** At this magnification lettering turns to mush, so the on-screen content has to be legible through motion alone: a car through a corner, a character running, a level loading. A menu of game titles or a title screen is the wrong choice. Same for a remote — show a picture changing, not a channel list.
+
+**The scale risk doubles here.** A held controller is where the model's priors pull hardest toward normal size (§Scale continuity anchor), and this frame holds two such objects at once. Give the controller its own comparator, keep contact fingertip-only, and restate the product's comparator in the same sentence.
+
+**The tell before it becomes setup.** When a loop tell is in the reel it is the payoff, so the plug-in or power-on that precedes it is demoted to preparation: keep it brief, no held beat, no lingering. A tell may be downgraded to setup when a bigger one follows — two equal climaxes still are not allowed.
 
 ### At least two micro-reactions, spread across the reel
 
