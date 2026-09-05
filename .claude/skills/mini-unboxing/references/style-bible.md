@@ -144,6 +144,41 @@ The assembled product stands or rests on the tabletop; if it's touched at all, o
 
 ---
 
+## ⚡ Interaction tells — the object has to react, not just be handled
+
+The whole niche runs on one loop: the hand acts, the object answers. A miniature that only gets moved around is a prop; one that responds is a machine that happens to be tiny. Two tiers, and the difference between them matters more than the total count.
+
+### One hero tell per reel — never two
+
+The single moment the product comes alive on its own. Pick exactly one, match it to the product, and give it a held beat afterwards.
+
+| Tell | What happens | Fits |
+|---|---|---|
+| **Power tell** | a connector seats and the product's own light comes on (archetype 8) | anything with a visible port and a cable |
+| **Screen tell** | a display wakes from black, a boot logo or indicator builds and fills it | console, phone, camera, monitor, handheld |
+| **Motion tell** | something moves with no hand on it — propellers turn a half rotation, a disc tray slides out, a gimbal self-levels, a lens extends | drone, console, camera, anything motorised |
+| **Wake tell** | the lid alone opens and the product responds unprompted, no button pressed | earbud case, clamshell devices, anything with a sensor |
+
+Prefer the tell that only this product could do. A logo lighting up is available to everything; propellers turning belong to a drone alone, and the specific one always reads stronger.
+
+**Two hero tells cancel each other out.** In ten seconds there is room for one moment the viewer replays. A reel where the device charges *and* boots *and* spins has no such moment — it reads as a product advert. One tell, properly held, beats three rushed ones.
+
+**The state persists.** Whatever the tell changed — a lit panel, a woken screen, an extended lens — every later shot must restate it (`its logo panel still lit`, `the screen still glowing`). A state that quietly reverts on the next hard cut throws the beat away. Archetype 8 restates this for the plug-in case.
+
+### At least two micro-reactions, spread across the reel
+
+These cost no beat of their own because they ride inside sentences already there. They are what separates "a hand touches an object" from "an object with mass and give":
+
+- foam visibly relaxing back after the product is lifted out of it
+- a lid resisting, then giving
+- a button with real travel that rebounds after the fingertip leaves
+- a hinge overshooting a fraction before it settles
+- cardboard bowing slightly under a fingertip's pressure
+
+Two or three across the reel, one per shot at most — stacked into a single sentence they read as a keyword pile. §Extra scale-contrast techniques covers the same physical cues from the scale side; the difference here is intent, so use that list and place them deliberately rather than wherever they happen to fit.
+
+---
+
 ## 📏 Scale continuity anchor — repeat it every shot, not just once
 
 **Stating the scale ratio once in the style paragraph is not enough to stop the product drifting bigger or smaller between hard cuts.** Each shot is generated somewhat independently, and without a repeated concrete size cue, a tighter or wider framing on the next cut gets misread as the object itself growing or shrinking — the single most common continuity failure in test runs (the box reads matchbox-sized in shot 1, then noticeably larger by shot 3 with no in-story reason).
