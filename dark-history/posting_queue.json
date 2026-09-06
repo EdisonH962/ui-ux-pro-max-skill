@@ -13,11 +13,13 @@
     },
     {
       "script": "17 - The Ship That Never Came: Titanic/Californian (1912)",
-      "status": "pending",
+      "status": "posted",
       "video_url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3G8m1bxNBqhjlyBCY2gFUlzpzbo/fba64b59-80f9-4f2f-8bd9-8e9d90067121.mp4",
       "title": "Titanic 1912 — Another ship was close enough to see her sinking. It did nothing. #darkhistory #titanic #truestory",
       "music_sound_id": "6739957724429158401",
-      "duration_sec": 66.5
+      "duration_sec": 66.5,
+      "publish_id": "v_pub_url~v2.7682206062745765921",
+      "posted_at": "2026-09-06T00:08:00Z"
     },
     {
       "script": "18 - Curse of Tutankhamun (1922)",
