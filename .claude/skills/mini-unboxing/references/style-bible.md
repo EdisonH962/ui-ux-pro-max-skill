@@ -138,7 +138,17 @@ The cable is the excuse; the light is the shot. A dead miniature that suddenly r
 
 **The light stays on.** Once this shot has fired, every later shot must restate that the light is still there (`its logo panel still lit`, `the power ring still glowing`). A light that quietly goes out on the next hard cut throws the whole beat away. The cable must also have come from somewhere: like any accessory it needs an earlier TRAY / LINER PULL showing it in the box (§Object provenance rule).
 
-**9 HERO STAND / DETAIL PASS** · mandatory, always the last shot · 1.5-2.5 s
+**9 SELF-MOTION / CALIBRATION SWEEP** · the motion tell's shot — when the product moves under its own power once it has current · 2.0-2.5 s
+`Close macro three-quarter angle on the product standing alone on the tabletop.`
+No hand anywhere in frame. The product performs its own movement — a wheel sweeping lock to lock and snapping centre, propellers turning half a rotation, a lens extending, a gimbal levelling itself — then settles, overshooting a fraction before it stops. If it carries an indicator, that changes state with the movement. Hold on the stilled product.
+
+This is the one shot in a reel allowed to drop the hand, and only here: the absence *is* the statement — nobody is turning it, it turns itself. It works only once the earlier shots have nailed the scale, so it can never be shot 1 or 2. If losing the anchor feels too risky, keep two fingertips resting on the tabletop beside the product, not touching it.
+
+**10 INPUT LOOP** · the loop tell's payoff shot (§Interaction tells) · 2.0-2.5 s
+`Static three-quarter framing the input device and the screen together in one frame.`
+A thumb or fingertip works the control — a stick, a button, a wheel, a touch surface — and the picture answers inside the same frame while the input is still happening, never on the next cut. Fingertip contact only; the input device and whatever carries the screen each get their comparator restated in this sentence. Ends on a held beat with the input released and the control springing back.
+
+**11 HERO STAND / DETAIL PASS** · mandatory, always the last shot · 1.5-2.5 s
 `Static 45-degree hero close-up.`
 The assembled product stands or rests on the tabletop; if it's touched at all, only two fingertips pinch it lightly to tilt it — never a whole-hand hold — to catch the light across a signature detail (port, seam, sole, logo). Restate the comparator here too. Ends on a held static beat — never a new camera position.
 
@@ -156,9 +166,9 @@ The single moment the product comes alive on its own. Pick exactly one, match it
 |---|---|---|
 | **Power tell** | a connector seats and the product's own light comes on (archetype 8) | anything with a visible port and a cable |
 | **Screen tell** | a display wakes from black, a boot logo or indicator builds and fills it | console, phone, camera, monitor, handheld |
-| **Motion tell** | something moves with no hand on it — propellers turn a half rotation, a disc tray slides out, a gimbal self-levels, a lens extends | drone, console, camera, anything motorised |
-| **Wake tell** | the lid alone opens and the product responds unprompted, no button pressed | earbud case, clamshell devices, anything with a sensor |
-| **Loop tell** | the hand works a controller or remote and the screen answers inside the same frame | console plus display, TV plus remote, handheld console |
+| **Motion tell** (archetype 9) | something moves with no hand on it — propellers turn a half rotation, a disc tray slides out, a gimbal self-levels, a lens extends, a wheel sweeps lock to lock | drone, console, camera, force-feedback peripheral, anything motorised |
+| **Wake tell** (archetype 2's camera) | the lid alone opens and the product responds unprompted, no button pressed | earbud case, clamshell devices, anything with a sensor |
+| **Loop tell** (archetype 10) | the hand works a controller or remote and the screen answers inside the same frame | console plus display, TV plus remote, handheld console |
 
 Prefer the tell that only this product could do. A logo lighting up is available to everything; propellers turning belong to a drone alone, and the specific one always reads stronger.
 
@@ -196,6 +206,7 @@ Never pick the tell by taste; pick it by what the product is. Read the class off
 | Earbuds, clamshell devices | Wake tell | nothing | the lid alone triggers it — never show a button being pressed |
 | Speaker, power bank, charger | Power tell | the charging cable, revealed from the box first | |
 | Laptop | Screen tell, fired by the lid opening | nothing | the hinge is also the reel's best micro-reaction |
+| Force-feedback peripheral — racing wheel, flight stick, haptic gamepad | Motion tell | nothing | its self-calibration sweep on power-up is the shot; do not route it to the loop tell just because it is an input device — the sweep is cheaper, needs no display, and only this class can do it |
 | Anything unpowered — sneaker, bag, perfume, watch, figure, trading cards | none | nothing | see below |
 
 **Unpowered products have no tell, and faking one ruins them.** A sneaker does not light up. For these the hero moment is mechanical instead: the single most satisfying physical action the object can perform — a perfume cap popping off its collar, a lace pulling through an eyelet and drawing tight, a watch clasp snapping shut, a card sliding free of its sleeve, a magnetic closure pulling itself the last millimetre. Treat it exactly like a tell: exactly one per reel, the longest beat, held afterwards. Everything else in §Interaction tells applies unchanged except the persistence rule, which has nothing to persist.
