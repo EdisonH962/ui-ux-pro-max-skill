@@ -101,6 +101,10 @@ When modifying files:
      `.claude/skills/impeccable/NOTICE.md`
    - The twelve skills listed in `.claude/skills/NOTICE-emilkowalski.md` (`animate`,
      `apple-design`, `write-swift`, ...) — https://github.com/emilkowalski/skills (MIT)
+   - `.claude/skills/taste/` — https://github.com/senlindesign/taste-skill.
+     License unresolved (README claims MIT, no LICENSE file upstream) and it needs
+     the Playwright MCP server at runtime; see `.claude/skills/taste/NOTICE.md`
+     before shipping it to third parties.
 
 ## Prerequisites
 
