@@ -59,6 +59,8 @@ cli/                              # CLI installer (ui-ux-pro-max-cli on npm)
     └── templates/                # Copy of src/ui-ux-pro-max/templates/
 
 .claude/skills/ui-ux-pro-max/     # Claude Code skill (symlinks to src/)
+.claude/skills/impeccable/        # Vendored third-party skill (Apache 2.0, do not edit)
+.claude/agents/                   # Impeccable companion subagents (vendored)
 .factory/skills/ui-ux-pro-max/   # Droid (Factory) skill (symlinks to src/)
 .shared/ui-ux-pro-max/            # Symlink to src/ui-ux-pro-max/
 .claude-plugin/                   # Claude Marketplace publishing
@@ -90,6 +92,11 @@ When modifying files:
    ```
 
 4. **Reference Folders** - No manual sync needed. The CLI generates these from templates during `uipro init`.
+
+5. **Vendored Skills** - `.claude/skills/impeccable/` and the `impeccable-*` agents in
+   `.claude/agents/` are copied verbatim from https://github.com/pbakaus/impeccable
+   (Apache 2.0). They are not generated from `src/` and must not be edited here — update
+   them by re-copying from upstream, per `.claude/skills/impeccable/NOTICE.md`.
 
 ## Prerequisites
 
