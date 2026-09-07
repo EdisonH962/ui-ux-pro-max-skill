@@ -105,6 +105,13 @@ When modifying files:
      License unresolved (README claims MIT, no LICENSE file upstream) and it needs
      the Playwright MCP server at runtime; see `.claude/skills/taste/NOTICE.md`
      before shipping it to third parties.
+   - The nineteen skills listed in `.claude/skills/NOTICE-social-media-skills.md` —
+     https://github.com/social-media-skills/skills (MIT), a subset of upstream's 106
+   - `.claude/skills/watch-video/` — https://github.com/Newuxtreme/watch-video-skill
+     (MIT); needs ffmpeg and yt-dlp on PATH
+   - `.claude/skills/video-shotcraft/` — https://github.com/Vincentwei1021/video-shotcraft
+     (Apache 2.0). ~55MB (36MB of bundled audio), primarily Chinese-language, and
+     needs Node + Remotion; see its NOTICE.md before packaging.
 
 ## Prerequisites
 
