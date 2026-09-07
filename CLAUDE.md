@@ -59,6 +59,9 @@ cli/                              # CLI installer (ui-ux-pro-max-cli on npm)
     └── templates/                # Copy of src/ui-ux-pro-max/templates/
 
 .claude/skills/ui-ux-pro-max/     # Claude Code skill (symlinks to src/)
+.claude/skills/impeccable/        # Vendored third-party skill (Apache 2.0, do not edit)
+.claude/skills/{animate,apple-design,...}  # Vendored emilkowalski/skills (MIT, do not edit)
+.claude/agents/                   # Impeccable companion subagents (vendored)
 .factory/skills/ui-ux-pro-max/   # Droid (Factory) skill (symlinks to src/)
 .shared/ui-ux-pro-max/            # Symlink to src/ui-ux-pro-max/
 .claude-plugin/                   # Claude Marketplace publishing
@@ -90,6 +93,25 @@ When modifying files:
    ```
 
 4. **Reference Folders** - No manual sync needed. The CLI generates these from templates during `uipro init`.
+
+5. **Vendored Skills** - Copied verbatim from upstream, not generated from `src/`, and
+   must not be edited here. Update each by re-copying from upstream, per its NOTICE:
+   - `.claude/skills/impeccable/` + the `impeccable-*` agents in `.claude/agents/` —
+     https://github.com/pbakaus/impeccable (Apache 2.0), see
+     `.claude/skills/impeccable/NOTICE.md`
+   - The twelve skills listed in `.claude/skills/NOTICE-emilkowalski.md` (`animate`,
+     `apple-design`, `write-swift`, ...) — https://github.com/emilkowalski/skills (MIT)
+   - `.claude/skills/taste/` — https://github.com/senlindesign/taste-skill.
+     License unresolved (README claims MIT, no LICENSE file upstream) and it needs
+     the Playwright MCP server at runtime; see `.claude/skills/taste/NOTICE.md`
+     before shipping it to third parties.
+   - The nineteen skills listed in `.claude/skills/NOTICE-social-media-skills.md` —
+     https://github.com/social-media-skills/skills (MIT), a subset of upstream's 106
+   - `.claude/skills/watch-video/` — https://github.com/Newuxtreme/watch-video-skill
+     (MIT); needs ffmpeg and yt-dlp on PATH
+   - `.claude/skills/video-shotcraft/` — https://github.com/Vincentwei1021/video-shotcraft
+     (Apache 2.0). ~55MB (36MB of bundled audio), primarily Chinese-language, and
+     needs Node + Remotion; see its NOTICE.md before packaging.
 
 ## Prerequisites
 

@@ -19,13 +19,13 @@ const assetRoot = join(repoRoot, 'cli', 'assets');
 const dirsToSync = ['data', 'scripts', 'templates'];
 const checkOnly = process.argv.includes('--check');
 
-// The 6 sibling sub-skills are bundled (as static copies) so `uipro init`
-// installs all 7 skills, not just the template-rendered orchestrator. Source
+// The 7 sibling sub-skills are bundled (as static copies) so `uipro init`
+// installs all 8 skills, not just the template-rendered orchestrator. Source
 // of truth is .claude/skills/ (the orchestrator ui-ux-pro-max is rendered from
 // templates at install time, so it is not mirrored here).
 const skillsSourceRoot = join(repoRoot, '.claude', 'skills');
 const skillsAssetRoot = join(assetRoot, 'skills');
-const subSkills = ['banner-design', 'brand', 'design', 'design-system', 'slides', 'ui-styling'];
+const subSkills = ['banner-design', 'brand', 'design', 'design-system', 'mini-unboxing', 'slides', 'ui-styling'];
 
 // ponytail: only text is bundled. Excludes (a) heavy binary assets — the
 // canvas fonts are ~5.8MB and a skill registers from its SKILL.md, not its
@@ -181,7 +181,7 @@ async function syncAssets() {
     }
   }
 
-  // Sub-skills: copy text content only (fonts/binaries excluded) so all 7
+  // Sub-skills: copy text content only (fonts/binaries excluded) so all 8
   // skills ship in the package without bloating it with ~5.8MB of fonts.
   const skillsTarget = assertInsideRepo(skillsAssetRoot);
   if (await exists(skillsTarget)) {
@@ -200,7 +200,7 @@ async function syncAssets() {
     }
   }
 
-  console.log('Synced CLI assets from src/ui-ux-pro-max + 6 sub-skills (normalized to LF).');
+  console.log('Synced CLI assets from src/ui-ux-pro-max + 7 sub-skills (normalized to LF).');
 }
 
 if (checkOnly) {
