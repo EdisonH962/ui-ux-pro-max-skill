@@ -51,3 +51,7 @@ out/
 .claude/settings.local.json
 .claude/session-state/
 ui-ux-pro-max-website/*
+
+# Persönliches Markenprofil — bewusst nicht im öffentlichen Repo
+# (zum Einchecken diese Zeile entfernen)
+brand-profile.md
