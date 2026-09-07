@@ -60,6 +60,7 @@ cli/                              # CLI installer (ui-ux-pro-max-cli on npm)
 
 .claude/skills/ui-ux-pro-max/     # Claude Code skill (symlinks to src/)
 .claude/skills/impeccable/        # Vendored third-party skill (Apache 2.0, do not edit)
+.claude/skills/{animate,apple-design,...}  # Vendored emilkowalski/skills (MIT, do not edit)
 .claude/agents/                   # Impeccable companion subagents (vendored)
 .factory/skills/ui-ux-pro-max/   # Droid (Factory) skill (symlinks to src/)
 .shared/ui-ux-pro-max/            # Symlink to src/ui-ux-pro-max/
@@ -93,10 +94,13 @@ When modifying files:
 
 4. **Reference Folders** - No manual sync needed. The CLI generates these from templates during `uipro init`.
 
-5. **Vendored Skills** - `.claude/skills/impeccable/` and the `impeccable-*` agents in
-   `.claude/agents/` are copied verbatim from https://github.com/pbakaus/impeccable
-   (Apache 2.0). They are not generated from `src/` and must not be edited here — update
-   them by re-copying from upstream, per `.claude/skills/impeccable/NOTICE.md`.
+5. **Vendored Skills** - Copied verbatim from upstream, not generated from `src/`, and
+   must not be edited here. Update each by re-copying from upstream, per its NOTICE:
+   - `.claude/skills/impeccable/` + the `impeccable-*` agents in `.claude/agents/` —
+     https://github.com/pbakaus/impeccable (Apache 2.0), see
+     `.claude/skills/impeccable/NOTICE.md`
+   - The twelve skills listed in `.claude/skills/NOTICE-emilkowalski.md` (`animate`,
+     `apple-design`, `write-swift`, ...) — https://github.com/emilkowalski/skills (MIT)
 
 ## Prerequisites
 
