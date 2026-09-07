@@ -23,11 +23,13 @@
     },
     {
       "script": "18 - Curse of Tutankhamun (1922)",
-      "status": "pending",
+      "status": "posted",
       "video_url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3G8m1bxNBqhjlyBCY2gFUlzpzbo/2d099eff-96c4-4562-bacb-42aafd4caaad.mp4",
       "title": "Tutankhamun 1922 — They opened the tomb in November. By April the man who paid for it was dead. #darkhistory #tutankhamun #mystery",
       "music_sound_id": "6739976214024292354",
-      "duration_sec": 88.28
+      "duration_sec": 88.28,
+      "publish_id": "v_pub_url~v2.7682576991950227488",
+      "posted_at": "2026-09-07T00:09:00Z"
     },
     {
       "script": "19 - Amelia Earhart (1937)",
