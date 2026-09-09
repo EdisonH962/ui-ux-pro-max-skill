@@ -33,11 +33,13 @@
     },
     {
       "script": "19 - Amelia Earhart (1937)",
-      "status": "pending",
+      "status": "posted",
       "video_url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3G8m1bxNBqhjlyBCY2gFUlzpzbo/4cb9cbfc-4c33-4457-a8d5-4371935b1953.mp4",
       "title": "Amelia Earhart 1937 — Her last transmission was fragmented. Then nothing. #darkhistory #ameliaearhart #mystery",
       "music_sound_id": "6859381931478353922",
-      "duration_sec": 76.5
+      "duration_sec": 76.5,
+      "publish_id": "v_pub_url~v2.7683319362757019680",
+      "posted_at": "2026-09-09T00:10:00Z"
     },
     {
       "script": "20 - Rasputin: What the Autopsy Said (1916)",
