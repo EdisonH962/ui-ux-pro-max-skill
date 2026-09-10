@@ -43,11 +43,13 @@
     },
     {
       "script": "20 - Rasputin: What the Autopsy Said (1916)",
-      "status": "pending",
+      "status": "posted",
       "video_url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3G8m1bxNBqhjlyBCY2gFUlzpzbo/050ffef8-54bf-4cfe-b006-5ce3c8957eb1.mp4",
       "title": "Rasputin 1916 — The famous story says poison. The autopsy says otherwise. #darkhistory #rasputin #truestory",
       "music_sound_id": "6577640999927941893",
-      "duration_sec": 81.5
+      "duration_sec": 81.5,
+      "publish_id": "v_pub_url~v2.7683690702055901217",
+      "posted_at": "2026-09-10T00:09:00Z"
     },
     {
       "script": "21 - The Hindenburg (1937)",
