@@ -53,11 +53,13 @@
     },
     {
       "script": "21 - The Hindenburg (1937)",
-      "status": "pending",
+      "status": "posted",
       "video_url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3G8m1bxNBqhjlyBCY2gFUlzpzbo/54b0ec8a-eba4-4753-932f-37e9a2bc4de2.mp4",
       "title": "The Hindenburg 1937 — It burned in thirty-two seconds. Nobody agrees on why. #darkhistory #hindenburg #mystery",
       "music_sound_id": "6783960728287053825",
-      "duration_sec": 62.28
+      "duration_sec": 62.28,
+      "publish_id": "v_pub_url~v2.7684061862413191201",
+      "posted_at": "2026-09-11T00:12:00Z"
     },
     {
       "script": "22 - The Woman Who Claimed to Be Anastasia (1920)",
