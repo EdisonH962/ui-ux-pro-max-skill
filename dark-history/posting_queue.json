@@ -63,11 +63,13 @@
     },
     {
       "script": "22 - The Woman Who Claimed to Be Anastasia (1920)",
-      "status": "pending",
+      "status": "posted",
       "video_url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3G8m1bxNBqhjlyBCY2gFUlzpzbo/62dbbf55-975b-4b91-95bb-8ff4cf607603.mp4",
       "title": "Anastasia 1920 — For sixty years she said she was the Tsar's daughter. #darkhistory #anastasia #truestory",
       "music_sound_id": "6886943025189095425",
-      "duration_sec": 85.5
+      "duration_sec": 85.5,
+      "publish_id": "v_pub_url~v2.7684432578719565856",
+      "posted_at": "2026-09-12T00:09:00Z"
     },
     {
       "script": "23 - Flight 19 (1945)",
