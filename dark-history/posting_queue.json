@@ -73,11 +73,13 @@
     },
     {
       "script": "23 - Flight 19 (1945)",
-      "status": "pending",
+      "status": "posted",
       "video_url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3G8m1bxNBqhjlyBCY2gFUlzpzbo/ae0173e8-c9e0-474f-8bb7-800cb94c0b91.mp4",
       "title": "Flight 19 1945 — Five planes vanished. Then the rescue plane vanished too. #darkhistory #flight19 #mystery",
       "music_sound_id": "6739980818015324161",
-      "duration_sec": 81.5
+      "duration_sec": 81.5,
+      "publish_id": "v_pub_url~v2.7684803555349743648",
+      "posted_at": "2026-09-13T00:09:00Z"
     },
     {
       "script": "24 - Lizzie Borden (1892)",
