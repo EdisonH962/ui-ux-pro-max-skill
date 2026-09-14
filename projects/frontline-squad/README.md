@@ -1,25 +1,24 @@
-# Blitz Brigade — Open Remake
+# Frontline Squad
 
-Ein spielbarer Nachbau des 2019 abgeschalteten Gameloft-Shooters *Blitz Brigade*:
-Cartoon-Team-Shooter, fünf Klassen, Team Deathmatch und Domination, komplett im
-Browser, ohne Server, ohne Build-Schritt.
+Cartoon-Team-Shooter im Browser: fünf Klassen, Bots, Team Deathmatch und Domination —
+ohne Server, ohne Build-Schritt, ohne externe Assets.
 
-**Nichts davon stammt von Gameloft.** Engine, Map, Modelle, Sounds und UI sind neu
-geschrieben bzw. zur Laufzeit prozedural erzeugt. Es ist ein inoffizielles,
-nicht-kommerzielles Fanprojekt.
+Engine, Map, Modelle, Texturen, Sounds und UI sind vollständig eigenständig; Geometrie
+und Texturen entstehen zur Laufzeit im Code.
 
 ## Starten
 
 ES-Module brauchen HTTP — ein Doppelklick auf `index.html` (`file://`) reicht nicht:
 
 ```bash
-cd projects/blitz-brigade-remake
+cd projects/frontline-squad
 python3 -m http.server 8000
 # dann http://localhost:8000 öffnen
 ```
 
-Läuft vollständig offline: three.js liegt als Kopie in `vendor/` (MIT-Lizenz,
-siehe `vendor/three-LICENSE.txt`). Kein CDN, keine Assets, keine Abhängigkeiten.
+Läuft vollständig offline: three.js 0.186 liegt als Kopie in `vendor/` (MIT-Lizenz,
+siehe `vendor/three-LICENSE.txt`), die benötigten Addons unter `vendor/addons/`.
+Kein CDN, keine Bilddateien, keine Abhängigkeiten.
 
 ## Steuerung
 
@@ -55,13 +54,16 @@ Auf Touchgeräten erscheinen automatisch Stick, Blickfeld und Aktionsbuttons.
 **Bots** — 4v4 bis 8v8, drei Schwierigkeitsgrade (Rekrut/Veteran/Elite).
 **Map** — „Sandsturm-Basar": zwei Basen, zentraler Marktturm als umkämpfte Höhe,
 zwei Innenhöfe als Flankenpunkte.
+**Grafikstufen** — Niedrig/Mittel/Hoch im Menü; Touchgeräte starten automatisch auf Niedrig.
 
 ## Architektur
 
 ```
 index.html          Importmap, HUD-Markup, Menü-/Pause-/Endscreen
 css/style.css       HUD und Menü (Comic-Military-Look, responsive, Touch-Layout)
+assets/             Drop-in-Punkt für echte Texturen (manifest.json), sonst leer
 js/config.js        Balancing: Klassen, Waffen, Modi, Physik, Bot-Stufen
+js/materials.js     Prozedurale Texturen und Materialbibliothek, UV-Skalierung pro Mesh
 js/world.js         Map-Geometrie, Kollisionsboxen, Capture-Punkte, Navigationsgitter + A*
 js/entities.js      Fighter-Basisklasse: Modell, Bewegung, Kollision, Hitscan, Fähigkeiten
 js/player.js        Erste-Person-Kamera, Rückstoß, Viewmodel, Eingabeauswertung
@@ -72,6 +74,22 @@ js/hud.js           HUD, Minimap, Killfeed, Punktetafel, Endscreen
 js/audio.js         Alle Sounds synthetisch über WebAudio erzeugt
 js/main.js          Renderer, Menü, Matchaufbau, Spielschleife
 ```
+
+### Grafikpipeline
+
+Gerendert wird linear in ein Halbfloat-Target: `RenderPass` → Bloom → Vignette/Grade →
+`OutputPass` (dort passieren Tone Mapping und Farbraum). Materialien sind `MeshStandard`
+mit neutralem IBL aus `RoomEnvironment`, Sonne plus Hemisphärenlicht in physikalischen
+Einheiten, ACES-Tone-Mapping bei Belichtung 0.95.
+
+Jede Oberfläche bekommt ihre Textur aus `js/materials.js`, gezeichnet in ein Canvas und
+kachelbar gemacht. Die UVs werden **pro Mesh** auf die Boxmaße umgerechnet
+(`applyBoxUVs`), damit eine 30-Meter-Wand und eine 2-Meter-Kiste dieselbe Texeldichte
+haben — sonst wirkt dieselbe Textur einmal grob und einmal verwaschen.
+
+Die drei Grafikstufen greifen dort an, wo die Kosten wirklich liegen: Die niedrige Stufe
+schaltet Schatten und IBL ab und rendert unterhalb der nativen Auflösung, weil das im
+Messwert deutlich mehr bringt als das Abschalten der Post-Effekte allein.
 
 ### Technische Notizen
 

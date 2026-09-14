@@ -2,8 +2,8 @@
 // Everything the designer wants to tweak lives here.
 
 export const TEAMS = {
-  alpha: { id: 'alpha', name: 'Rising Sun', color: 0xff5a3c, css: '#ff5a3c', light: '#ffb199' },
-  bravo: { id: 'bravo', name: 'Royal Marines', color: 0x38b6ff, css: '#38b6ff', light: '#a8e0ff' },
+  alpha: { id: 'alpha', name: 'Ember Company', color: 0xff5a3c, css: '#ff5a3c', light: '#ffb199' },
+  bravo: { id: 'bravo', name: 'Azure Vanguard', color: 0x38b6ff, css: '#38b6ff', light: '#a8e0ff' },
 };
 
 export const ENEMY_OF = { alpha: 'bravo', bravo: 'alpha' };

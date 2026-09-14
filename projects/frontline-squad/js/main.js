@@ -1,7 +1,14 @@
 // Bootstrap: renderer, menu, match setup and the main loop.
 
 import * as THREE from 'three';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { CLASSES, CLASS_LIST, MODES, DIFFICULTY, TEAMS, BOT_NAMES, RULES } from './config.js';
+import { MaterialLibrary } from './materials.js';
 import { World } from './world.js';
 import { Arena } from './arena.js';
 import { FX } from './fx.js';
@@ -13,6 +20,35 @@ import { Bot } from './bots.js';
 
 const $ = (sel) => document.querySelector(sel);
 
+/** Subtle vignette and warm grade — keeps the eye on the centre of the screen. */
+const GradeShader = {
+  uniforms: {
+    tDiffuse: { value: null },
+    strength: { value: 0.38 },
+    warmth: { value: 0.04 },
+  },
+  vertexShader: `
+    varying vec2 vUv;
+    void main() {
+      vUv = uv;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }`,
+  fragmentShader: `
+    uniform sampler2D tDiffuse;
+    uniform float strength;
+    uniform float warmth;
+    varying vec2 vUv;
+    void main() {
+      vec4 texel = texture2D(tDiffuse, vUv);
+      float d = distance(vUv, vec2(0.5));
+      float vig = smoothstep(0.85, 0.28, d);
+      texel.rgb *= mix(1.0 - strength, 1.0, vig);
+      texel.r *= 1.0 + warmth;
+      texel.b *= 1.0 - warmth * 0.6;
+      gl_FragColor = texel;
+    }`,
+};
+
 class Game {
   constructor() {
     this.canvas = $('#view');
@@ -21,6 +57,9 @@ class Game {
     this.renderer.setSize(innerWidth, innerHeight);
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    this.renderer.toneMappingExposure = 0.95;
+    this.renderer.outputColorSpace = THREE.SRGBColorSpace;
 
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(78, innerWidth / innerHeight, 0.05, 500);
@@ -33,7 +72,20 @@ class Game {
     this.player = null;
     this.difficulty = DIFFICULTY.veteran;
 
-    this.world = new World(this.scene).build();
+    // neutral studio IBL so metals and glossy surfaces have something to reflect
+    const pmrem = new THREE.PMREMGenerator(this.renderer);
+    this.envMap = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+    this.scene.environment = this.envMap;
+    this.scene.environmentIntensity = 0.35;
+    pmrem.dispose();
+
+    this.materials = new MaterialLibrary(this.renderer);
+    this.world = new World(this.scene, this.materials).build();
+    // phones start on the low tier; desktops on medium, switchable in the menu
+    const coarse = matchMedia('(pointer: coarse)').matches;
+    this.applyQuality(coarse ? 'low' : 'medium');
+    // real textures, if the project ships any, replace the procedural ones here
+    this.materials.loadManifest();
     this.fx = new FX(this.scene);
     this.audio = new AudioEngine();
     this.arena = new Arena(this);
@@ -56,8 +108,67 @@ class Game {
 
   // ----------------------------------------------------------------- menu
 
+  /**
+   * Quality tiers. Post-processing and MSAA are the expensive part of this pipeline,
+   * so the low tier drops the composer entirely and renders straight to the canvas —
+   * that is the difference between playable and slideshow on weak mobile GPUs.
+   */
+  applyQuality(level) {
+    this.quality = level;
+    const preset = {
+      // shadows and image-based lighting cost far more than the post chain does,
+      // so the low tier drops both and renders below native resolution
+      low:    { samples: 0, bloom: false, composer: false, shadow: 0, pixelRatio: 0.75, env: 0 },
+      medium: { samples: 0, bloom: true, composer: true, shadow: 1024, pixelRatio: 1, env: 0.35 },
+      high:   { samples: 4, bloom: true, composer: true, shadow: 2048, pixelRatio: 2, env: 0.35 },
+    }[level] || {};
+
+    this.renderer.setPixelRatio(Math.min(devicePixelRatio, preset.pixelRatio));
+    this.scene.environment = preset.env > 0 ? this.envMap : null;
+    this.scene.environmentIntensity = preset.env;
+
+    const sun = this.world.sun;
+    this.renderer.shadowMap.enabled = preset.shadow > 0;
+    if (sun) {
+      sun.castShadow = preset.shadow > 0;
+      if (preset.shadow > 0 && sun.shadow.mapSize.width !== preset.shadow) {
+        sun.shadow.mapSize.set(preset.shadow, preset.shadow);
+      }
+      if (sun.shadow.map) { sun.shadow.map.dispose(); sun.shadow.map = null; }
+    }
+    this.scene.traverse((o) => { if (o.isMesh && o.material) o.material.needsUpdate = true; });
+
+    if (this.composer) {
+      this.composer.renderTarget1.dispose();
+      this.composer.renderTarget2.dispose();
+      this.composer = null;
+      this.bloom = null;
+    }
+    if (!preset.composer) return;
+
+    const target = new THREE.WebGLRenderTarget(innerWidth, innerHeight, {
+      samples: preset.samples,          // MSAA inside the composer chain
+      type: THREE.HalfFloatType,        // keep highlights linear for the bloom pass
+    });
+    this.composer = new EffectComposer(this.renderer, target);
+    this.composer.addPass(new RenderPass(this.scene, this.camera));
+    if (preset.bloom) {
+      this.bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.16, 0.6, 1.0);
+      this.composer.addPass(this.bloom);
+    }
+    this.composer.addPass(new ShaderPass(GradeShader));
+    this.composer.addPass(new OutputPass());   // tone mapping + colour space happen here
+    this.composer.setSize(innerWidth, innerHeight);
+    this.composer.setPixelRatio(Math.min(devicePixelRatio, preset.pixelRatio));
+  }
+
+  render() {
+    if (this.composer) this.composer.render();
+    else this.renderer.render(this.scene, this.camera);
+  }
+
   setupMenu() {
-    this.selected = { cls: 'soldier', mode: 'tdm', size: 6, diff: 'veteran' };
+    this.selected = { cls: 'soldier', mode: 'tdm', size: 6, diff: 'veteran', quality: null };
 
     const classGrid = $('#class-grid');
     classGrid.innerHTML = CLASS_LIST.map((c) => `
@@ -88,6 +199,7 @@ class Game {
       });
     };
     wire('#mode-select', 'mode');
+    wire('#quality-select', 'quality');
     wire('#size-select', 'size');
     wire('#diff-select', 'diff');
 
@@ -130,6 +242,8 @@ class Game {
       this.renderer.setSize(innerWidth, innerHeight);
       this.camera.aspect = innerWidth / innerHeight;
       this.camera.updateProjectionMatrix();
+      if (this.composer) this.composer.setSize(innerWidth, innerHeight);
+      if (this.bloom) this.bloom.setSize(innerWidth, innerHeight);
     });
 
     this.input.onKey = (code, down) => {
@@ -174,6 +288,9 @@ class Game {
   }
 
   startMatch() {
+    if (this.selected.quality && this.selected.quality !== this.quality) {
+      this.applyQuality(this.selected.quality);
+    }
     this.audio.init();
     this.audio.setVolume(this.settings.volume / 100);
     this.clearFighters();
@@ -278,7 +395,7 @@ class Game {
       this.camera.position.set(Math.sin(this.menuCam.angle) * r, 20, Math.cos(this.menuCam.angle) * r);
       this.camera.lookAt(0, 6, 0);
       this.fx.update(dt);
-      this.renderer.render(this.scene, this.camera);
+      this.render();
       return;
     }
 
@@ -292,7 +409,7 @@ class Game {
       this.hud.update(dt);
     }
 
-    this.renderer.render(this.scene, this.camera);
+    this.render();
   }
 }
 

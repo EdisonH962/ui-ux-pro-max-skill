@@ -3,11 +3,16 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover" />
-<title>Blitz Brigade — Open Remake</title>
+<title>Frontline Squad</title>
 <link rel="stylesheet" href="css/style.css" />
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💥</text></svg>" />
 <script type="importmap">
-{ "imports": { "three": "./vendor/three.module.min.js" } }
+{
+  "imports": {
+    "three": "./vendor/three.module.min.js",
+    "three/addons/": "./vendor/addons/"
+  }
+}
 </script>
 </head>
 <body>
@@ -27,7 +32,7 @@
 
   <header id="topbar">
     <div class="team-score alpha">
-      <span class="tname">Rising Sun</span>
+      <span class="tname">Ember Company</span>
       <span id="score-alpha" class="value">0</span>
       <div class="bar"><i id="bar-alpha"></i></div>
     </div>
@@ -36,7 +41,7 @@
       <div id="points-strip" class="hidden"></div>
     </div>
     <div class="team-score bravo">
-      <span class="tname">Royal Marines</span>
+      <span class="tname">Azure Vanguard</span>
       <span id="score-bravo" class="value">0</span>
       <div class="bar"><i id="bar-bravo"></i></div>
     </div>
@@ -92,8 +97,8 @@
 <!-- ──────────────────────────── MENU ───────────────────────────── -->
 <section id="menu">
   <div class="menu-inner">
-    <h1 class="logo"><span>BLITZ</span> BRIGADE <small>open remake</small></h1>
-    <p class="sub">Fan-Nachbau des eingestellten Gameloft-Shooters — eigene Engine, eigene Assets, 100 % offline im Browser.</p>
+    <h1 class="logo"><span>FRONTLINE</span> SQUAD <small>class warfare</small></h1>
+    <p class="sub">Team-Shooter mit fünf Klassen, Bots und Domination — eigene Engine, eigene Assets, läuft offline im Browser.</p>
 
     <h2 class="section-title">Klasse wählen</h2>
     <div id="class-grid" class="grid"></div>
@@ -122,6 +127,14 @@
           <button class="chip" data-value="elite">Elite</button>
         </div>
       </div>
+      <div class="opt">
+        <h3>Grafik</h3>
+        <div id="quality-select" class="chips">
+          <button class="chip" data-value="low">Niedrig</button>
+          <button class="chip active" data-value="medium">Mittel</button>
+          <button class="chip" data-value="high">Hoch</button>
+        </div>
+      </div>
       <div class="opt sliders">
         <h3>Einstellungen</h3>
         <label>Mausempfindlichkeit <input id="sens-slider" type="range" min="0.5" max="6" step="0.1" value="2.2" /> <b id="sens-value">2.2</b></label>
@@ -136,7 +149,7 @@
       <span><b>Rechts</b> Zielfernrohr (Sniper)</span><span><b>Leer</b> Springen</span><span><b>Shift</b> Sprint</span>
       <span><b>R</b> Nachladen</span><span><b>Q/F</b> Fähigkeit</span><span><b>Tab</b> Punkte</span><span><b>Esc</b> Pause</span>
     </div>
-    <p class="legal">Inoffizielles, nicht-kommerzielles Fanprojekt. Kein Code, keine Grafiken und keine Marken von Gameloft — alles hier ist neu gebaut.</p>
+    <p class="legal">Eigenständiges Projekt. Engine, Map, Modelle, Sounds und UI sind vollständig selbst gebaut; es werden keine fremden Spielinhalte verwendet.</p>
   </div>
 </section>
 

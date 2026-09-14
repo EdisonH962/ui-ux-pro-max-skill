@@ -4,39 +4,18 @@
 
 import * as THREE from 'three';
 import { TEAMS } from './config.js';
+import { applyBoxUVs } from './materials.js';
 
 const PALETTE = {
-  sand: 0xdcb878,
-  sandDark: 0xc39d5c,
-  plaster: 0xf0e2c8,
-  plasterWarm: 0xe4c9a0,
-  terracotta: 0xc1663f,
-  wood: 0x8a5a33,
-  metal: 0x9aa3ad,
-  shade: 0x6f5a3f,
+  sand: 'sand',
+  sandDark: 'stone',
+  plaster: 'plaster',
+  plasterWarm: 'plasterWarm',
+  terracotta: 'terracotta',
+  wood: 'wood',
+  metal: 'metal',
+  cloth: 'canvasCloth',
 };
-
-function makeSandTexture() {
-  const c = document.createElement('canvas');
-  c.width = c.height = 256;
-  const g = c.getContext('2d');
-  g.fillStyle = '#d9b678';
-  g.fillRect(0, 0, 256, 256);
-  for (let i = 0; i < 2600; i++) {
-    const x = Math.random() * 256, y = Math.random() * 256;
-    const r = Math.random() * 2.4;
-    const shade = Math.random() > 0.5 ? 'rgba(255,240,200,0.30)' : 'rgba(150,115,60,0.22)';
-    g.fillStyle = shade;
-    g.beginPath();
-    g.arc(x, y, r, 0, Math.PI * 2);
-    g.fill();
-  }
-  const tex = new THREE.CanvasTexture(c);
-  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-  tex.repeat.set(30, 30);
-  tex.anisotropy = 4;
-  return tex;
-}
 
 function skyDome() {
   const geo = new THREE.SphereGeometry(400, 24, 16);
@@ -44,9 +23,9 @@ function skyDome() {
     side: THREE.BackSide,
     depthWrite: false,
     uniforms: {
-      top: { value: new THREE.Color(0x2a72c7) },
-      mid: { value: new THREE.Color(0x8fc6ec) },
-      bottom: { value: new THREE.Color(0xf3d9a8) },
+      top: { value: new THREE.Color(0x1f5fb0) },
+      mid: { value: new THREE.Color(0x9ccbe8) },
+      bottom: { value: new THREE.Color(0xf6dfb4) },
     },
     vertexShader: `
       varying vec3 vPos;
@@ -67,8 +46,9 @@ function skyDome() {
 }
 
 export class World {
-  constructor(scene) {
+  constructor(scene, materials) {
     this.scene = scene;
+    this.mats = materials;
     this.colliders = [];          // Box3 list for movement
     this.collisionMeshes = [];    // meshes for ray casts
     this.spawns = { alpha: [], bravo: [] };
@@ -82,28 +62,33 @@ export class World {
   }
 
   build() {
-    this.scene.fog = new THREE.Fog(0xe8cfa4, 60, 190);
+    this.scene.fog = new THREE.Fog(0xe4c9a0, 70, 230);
     this.scene.add(skyDome());
 
-    const hemi = new THREE.HemisphereLight(0xbfd8ff, 0xd8b27a, 1.05);
+    // key light is a low, warm desert sun; the sky fills the shadows with cool bounce
+    const hemi = new THREE.HemisphereLight(0xa8c8f0, 0xd8b27a, 0.5);
     this.scene.add(hemi);
-    const sun = new THREE.DirectionalLight(0xfff0d0, 1.5);
-    sun.position.set(45, 70, 28);
+    const sun = new THREE.DirectionalLight(0xffe7bd, 2.1);
+    sun.position.set(48, 62, 26);
     sun.castShadow = true;
     sun.shadow.mapSize.set(2048, 2048);
     const s = 80;
     sun.shadow.camera.left = -s; sun.shadow.camera.right = s;
     sun.shadow.camera.top = s; sun.shadow.camera.bottom = -s;
     sun.shadow.camera.far = 220;
-    sun.shadow.bias = -0.0007;
+    sun.shadow.bias = -0.0004;
+    sun.shadow.normalBias = 0.035;
     this.scene.add(sun);
     this.scene.add(sun.target);
+    this.sun = sun;
 
     // ground
-    const ground = new THREE.Mesh(
-      new THREE.PlaneGeometry(260, 260),
-      new THREE.MeshLambertMaterial({ map: makeSandTexture() })
-    );
+    const groundGeo = new THREE.PlaneGeometry(260, 260);
+    const groundUv = groundGeo.attributes.uv;
+    for (let i = 0; i < groundUv.count; i++) {
+      groundUv.setXY(i, groundUv.getX(i) * 65, groundUv.getY(i) * 65);
+    }
+    const ground = new THREE.Mesh(groundGeo, this.mats.get('sand'));
     ground.rotation.x = -Math.PI / 2;
     ground.receiveShadow = true;
     this.group.add(ground);
@@ -115,6 +100,7 @@ export class World {
     this.buildCentre();
     this.buildFlanks();
     this.buildProps();
+    this.decorate();
     this.buildCapturePoints();
     // Raycasts read matrixWorld, which three.js only refreshes during a render.
     // The nav mesh is built before the first frame, so push the matrices now —
@@ -126,13 +112,23 @@ export class World {
 
   // ---------------------------------------------------------------- builders
 
-  box(x, y, z, w, h, d, color, opts = {}) {
-    const mat = new THREE.MeshLambertMaterial({
-      color,
-      transparent: opts.opacity != null,
-      opacity: opts.opacity != null ? opts.opacity : 1,
-    });
-    const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
+  box(x, y, z, w, h, d, surface, opts = {}) {
+    let mat;
+    let tile = 1;
+    if (typeof surface === 'string') {
+      mat = this.mats.get(surface);
+      tile = this.mats.tileOf(surface);
+    } else {
+      mat = this.mats.color(surface, opts);
+    }
+    if (opts.opacity != null) {
+      mat = mat.clone();
+      mat.transparent = true;
+      mat.opacity = opts.opacity;
+    }
+    const geo = new THREE.BoxGeometry(w, h, d);
+    if (typeof surface === 'string') applyBoxUVs(geo, w, h, d, tile);
+    const mesh = new THREE.Mesh(geo, mat);
     mesh.position.set(x, y + h / 2, z);
     mesh.castShadow = opts.cast !== false;
     mesh.receiveShadow = true;
@@ -153,10 +149,11 @@ export class World {
     fn(-1);
   }
 
-  cylinder(x, y, z, r, h, color, opts = {}) {
+  cylinder(x, y, z, r, h, surface, opts = {}) {
+    const mat = typeof surface === 'string' ? this.mats.get(surface) : this.mats.color(surface, opts);
     const mesh = new THREE.Mesh(
-      new THREE.CylinderGeometry(r, r, h, opts.segments || 12),
-      new THREE.MeshLambertMaterial({ color })
+      new THREE.CylinderGeometry(r, r, h, opts.segments || 16),
+      mat
     );
     mesh.position.set(x, y + h / 2, z);
     mesh.castShadow = true;
@@ -304,16 +301,107 @@ export class World {
     // palms: trunk + canopy (canopy is decorative only)
     const palms = [[-40, -20], [40, 20], [-44, 30], [44, -30], [-12, 40], [12, -40], [30, 36], [-30, -36]];
     palms.forEach(([x, z]) => {
-      this.cylinder(x, 0, z, 0.45, 7, 0x7d5b3a, { segments: 8 });
+      this.cylinder(x, 0, z, 0.45, 7, PALETTE.wood, { segments: 8 });
       const canopy = new THREE.Mesh(
         new THREE.IcosahedronGeometry(3, 0),
-        new THREE.MeshLambertMaterial({ color: 0x4f9e4a, flatShading: true })
+        this.mats.color(0x4f9e4a, { flatShading: true, roughness: 0.9 })
       );
       canopy.position.set(x, 7.6, z);
       canopy.scale.y = 0.55;
       canopy.castShadow = true;
       this.group.add(canopy);
     });
+  }
+
+  /**
+   * Purely visual detail pass. Everything here is non-solid: it must not change
+   * collision or the nav mesh, only the silhouette and surface break-up.
+   */
+  decorate() {
+    const deco = (x, y, z, w, h, d, surface) => this.box(x, y, z, w, h, d, surface, { solid: false });
+
+    // crenellations along the perimeter wall
+    const half = 58;
+    for (let i = -54; i <= 54; i += 6) {
+      deco(i, 9, -half, 2.6, 1.2, 2.6, PALETTE.sandDark);
+      deco(i, 9, half, 2.6, 1.2, 2.6, PALETTE.sandDark);
+      deco(-half, 9, i, 2.6, 1.2, 2.6, PALETTE.sandDark);
+      deco(half, 9, i, 2.6, 1.2, 2.6, PALETTE.sandDark);
+    }
+
+    this.sym((s) => {
+      const z = s * 44;
+      const front = z - s * 7;
+      // hangar: cornice band, roof beams, window slots
+      deco(0, 6.6, z, 33, 0.5, 18, PALETTE.wood);
+      for (const bx of [-12, -6, 0, 6, 12]) deco(bx, 7.8, front + s * 0.6, 1, 0.5, 2.6, PALETTE.wood);
+      for (const wz of [-4, 0, 4]) {
+        deco(-15.7, 3.6, z + wz, 0.5, 1.6, 2.2, 0x2a2118);
+        deco(15.7, 3.6, z + wz, 0.5, 1.6, 2.2, 0x2a2118);
+      }
+      // balcony railing
+      deco(s * 26, 6.6, z - s * 16.2, 9, 1.1, 0.5, PALETTE.wood);
+
+      // flank courtyard: crenellations on the walkway
+      const fx = s * 34;
+      for (let i = -8; i <= 8; i += 4) {
+        deco(fx + i, 5.2, -12, 2.2, 1.0, 2.2, PALETTE.sandDark);
+        deco(fx + i, 5.2, 12, 2.2, 1.0, 2.2, PALETTE.sandDark);
+      }
+      // gate lintel and awning over the courtyard entrance
+      deco(fx - s * 8.5, 4.6, 0, 2.2, 0.8, 16, PALETTE.wood);
+      deco(fx - s * 10.5, 3.9, 0, 3.2, 0.3, 9, PALETTE.cloth);
+
+      // market stall awnings around the tower
+      deco(s * 14, 3.0, s * 13, 7.4, 0.3, 7.4, PALETTE.cloth);
+      deco(-s * 15, 3.8, s * 14, 6.4, 0.3, 6.4, PALETTE.cloth);
+    });
+
+    // tower: cornice, niches, canopy trim
+    deco(0, 4.6, 0, 17, 0.6, 17, PALETTE.wood);
+    // framed niches on each face of the tower base, so the walls are not blank
+    for (const [nx, nz, nw, nd] of [[0, 8.1, 2.4, 0.3], [0, -8.1, 2.4, 0.3], [8.1, 0, 0.3, 2.4], [-8.1, 0, 0.3, 2.4]]) {
+      deco(nx, 1.5, nz, nw, 2.4, nd, 0x3a2f24);                                  // recess
+      deco(nx, 1.5, nz, nw + 0.5, 0.3, nd + 0.1, PALETTE.wood);                  // sill
+      deco(nx, 3.9, nz, nw + 0.5, 0.35, nd + 0.1, PALETTE.wood);                 // lintel
+      if (nw > nd) {
+        deco(nx - nw / 2 - 0.12, 1.5, nz, 0.25, 2.4, nd + 0.1, PALETTE.wood);    // jambs
+        deco(nx + nw / 2 + 0.12, 1.5, nz, 0.25, 2.4, nd + 0.1, PALETTE.wood);
+      } else {
+        deco(nx, 1.5, nz - nd / 2 - 0.12, nw + 0.1, 2.4, 0.25, PALETTE.wood);
+        deco(nx, 1.5, nz + nd / 2 + 0.12, nw + 0.1, 2.4, 0.25, PALETTE.wood);
+      }
+    }
+    deco(0, 8.6, 0, 15.6, 0.35, 15.6, PALETTE.wood);
+
+    // sand drifts on the ground for tonal variation
+    for (let i = 0; i < 26; i++) {
+      const a = Math.random() * Math.PI * 2;
+      const r = 12 + Math.random() * 40;
+      const drift = new THREE.Mesh(
+        new THREE.CircleGeometry(3 + Math.random() * 7, 12),
+        this.mats.color(0xc9a367, { roughness: 1 })
+      );
+      drift.material.transparent = true;
+      drift.material.opacity = 0.35;
+      drift.rotation.x = -Math.PI / 2;
+      drift.position.set(Math.cos(a) * r, 0.02, Math.sin(a) * r);
+      drift.receiveShadow = true;
+      this.group.add(drift);
+    }
+
+    // distant dunes outside the arena so the horizon is not empty sky
+    for (let i = 0; i < 26; i++) {
+      const a = (i / 26) * Math.PI * 2 + Math.random() * 0.15;
+      const r = 90 + Math.random() * 60;
+      const hill = new THREE.Mesh(
+        new THREE.IcosahedronGeometry(16 + Math.random() * 22, 1),
+        this.mats.color(0xcfae7d, { flatShading: true, roughness: 1 })
+      );
+      hill.position.set(Math.cos(a) * r, -6 - Math.random() * 6, Math.sin(a) * r);
+      hill.scale.y = 0.45;
+      this.group.add(hill);
+    }
   }
 
   buildCapturePoints() {

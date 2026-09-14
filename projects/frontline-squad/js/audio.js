@@ -40,7 +40,8 @@ export class AudioEngine {
   }
 
   noise(duration, { gain = 0.4, filter = 1800, type = 'lowpass', q = 1, sweepTo = null, delay = 0 } = {}) {
-    if (!this.enabled || !this.ctx) return;
+    // a zero target is illegal for an exponential ramp, and inaudible anyway
+    if (!this.enabled || !this.ctx || gain <= 0.0005) return;
     const t0 = this.t + delay;
     const src = this.ctx.createBufferSource();
     src.buffer = this.noiseBuffer;
@@ -58,7 +59,7 @@ export class AudioEngine {
   }
 
   tone(freq, duration, { gain = 0.2, type = 'square', to = null, delay = 0 } = {}) {
-    if (!this.enabled || !this.ctx) return;
+    if (!this.enabled || !this.ctx || gain <= 0.0005) return;
     const t0 = this.t + delay;
     const osc = this.ctx.createOscillator();
     osc.type = type;
@@ -112,6 +113,7 @@ export class AudioEngine {
 
   explosion(distance = null) {
     const d = this.gainFor(distance);
+    if (d <= 0.01) return;
     this.noise(0.9, { gain: 0.8 * d, filter: 900, sweepTo: 60 });
     this.tone(60, 0.7, { gain: 0.35 * d, type: 'sawtooth', to: 25 });
   }

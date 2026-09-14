@@ -1,0 +1,4 @@
+{
+  "textures": {},
+  "note": "Map a material name to an image file to replace the procedural texture, e.g. \"sand\": \"textures/sand.png\". Valid names: sand, stone, plaster, plasterWarm, terracotta, wood, metal, canvasCloth."
+}

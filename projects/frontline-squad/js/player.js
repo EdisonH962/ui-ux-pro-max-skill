@@ -6,9 +6,11 @@ import { PHYSICS } from './config.js';
 
 function buildViewmodel(classId, teamColor) {
   const g = new THREE.Group();
-  const dark = new THREE.MeshLambertMaterial({ color: 0x343b45 });
-  const accent = new THREE.MeshLambertMaterial({ color: teamColor });
-  const hand = new THREE.MeshLambertMaterial({ color: 0xd9a271 });
+  const std = (color, roughness, metalness) =>
+    new THREE.MeshStandardMaterial({ color, roughness, metalness, envMapIntensity: 0.4 });
+  const dark = std(0x343b45, 0.42, 0.6);
+  const accent = std(teamColor, 0.6, 0.2);
+  const hand = std(0xd9a271, 0.9, 0.0);
 
   const add = (w, h, d, x, y, z, m = dark) => {
     const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m);

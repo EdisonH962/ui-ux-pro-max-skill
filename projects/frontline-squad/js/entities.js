@@ -16,7 +16,15 @@ const CLASS_ACCENT = {
 };
 
 function mat(color, opts = {}) {
-  return new THREE.MeshLambertMaterial({ color, ...opts });
+  return new THREE.MeshStandardMaterial({
+    color,
+    roughness: opts.roughness ?? 0.82,
+    metalness: opts.metalness ?? 0.0,
+    emissive: opts.emissive ?? 0x000000,
+    emissiveIntensity: opts.emissiveIntensity ?? 1,
+    envMapIntensity: 0.3,
+    flatShading: !!opts.flatShading,
+  });
 }
 
 function part(group, geo, material, x, y, z) {
@@ -28,51 +36,114 @@ function part(group, geo, material, x, y, z) {
   return m;
 }
 
-/** Blocky, TF2-ish soldier built entirely from boxes. */
+const box = (w, h, d) => new THREE.BoxGeometry(w, h, d);
+
+/**
+ * Blocky cartoon fighter. Each class gets its own silhouette — bulk, headgear and
+ * back-mounted gear — so the class reads at a glance from across the map, which
+ * matters more in a team shooter than surface detail does.
+ */
 export function makeFighterMesh(teamColor, classId) {
   const root = new THREE.Group();
   const body = new THREE.Group();
   root.add(body);
 
-  const teamMat = mat(teamColor);
-  const gearMat = mat(GEAR);
-  const skinMat = mat(SKIN);
-  const accentMat = mat(CLASS_ACCENT[classId] || 0x777777);
+  const teamMat = mat(teamColor, { emissive: new THREE.Color(teamColor).multiplyScalar(0.12) });
+  const gearMat = mat(GEAR, { roughness: 0.7, metalness: 0.15 });
+  const skinMat = mat(SKIN, { roughness: 0.9 });
+  const accentMat = mat(CLASS_ACCENT[classId] || 0x777777, { roughness: 0.75 });
+  const darkMat = mat(0x20262e, { roughness: 0.6, metalness: 0.25 });
+  const gunMat = mat(0x2f353d, { roughness: 0.45, metalness: 0.55 });
+  const glassMat = mat(0x0f1a24, { roughness: 0.15, metalness: 0.4, emissive: 0x16303f });
 
-  const legGeo = new THREE.BoxGeometry(0.24, 0.85, 0.28);
-  const legL = part(body, legGeo, gearMat, -0.16, 0.43, 0);
-  const legR = part(body, legGeo, gearMat, 0.16, 0.43, 0);
+  const heavy = classId === 'gunner';
+  const slim = classId === 'stealth' || classId === 'medic';
+  const bulk = heavy ? 1.22 : slim ? 0.9 : 1;
 
-  const torso = part(body, new THREE.BoxGeometry(0.72, 0.78, 0.44), teamMat, 0, 1.22, 0);
-  part(body, new THREE.BoxGeometry(0.74, 0.34, 0.46), accentMat, 0, 0.98, 0);      // belt / webbing
-  part(body, new THREE.BoxGeometry(0.5, 0.5, 0.24), accentMat, 0, 1.3, -0.3);      // backpack
+  // legs and boots
+  const legGeo = box(0.24 * bulk, 0.66, 0.28);
+  const legL = part(body, legGeo, gearMat, -0.16 * bulk, 0.52, 0);
+  const legR = part(body, legGeo, gearMat, 0.16 * bulk, 0.52, 0);
+  part(legL, box(0.28 * bulk, 0.22, 0.36), darkMat, 0, -0.34, 0.04);
+  part(legR, box(0.28 * bulk, 0.22, 0.36), darkMat, 0, -0.34, 0.04);
 
-  const head = part(body, new THREE.BoxGeometry(0.38, 0.36, 0.38), skinMat, 0, 1.79, 0);
-  part(head, new THREE.BoxGeometry(0.44, 0.18, 0.44), teamMat, 0, 0.2, 0);          // helmet
-  part(head, new THREE.BoxGeometry(0.3, 0.1, 0.06), mat(0x1c2330), 0, 0.02, 0.2);   // visor
+  // torso, webbing, shoulders
+  const torso = part(body, box(0.72 * bulk, 0.78, 0.44 * bulk), teamMat, 0, 1.22, 0);
+  part(body, box(0.76 * bulk, 0.3, 0.47 * bulk), accentMat, 0, 0.98, 0);
+  part(body, box(0.3, 0.16, 0.2), darkMat, -0.2, 0.96, 0.24);          // belt pouch
+  part(body, box(0.3, 0.16, 0.2), darkMat, 0.2, 0.96, 0.24);
+  part(body, box(0.86 * bulk, 0.16, 0.46 * bulk), teamMat, 0, 1.55, 0); // shoulder line
 
-  const armGeo = new THREE.BoxGeometry(0.2, 0.62, 0.22);
-  const armL = part(body, armGeo, teamMat, -0.46, 1.28, 0.06);
-  const armR = part(body, armGeo, teamMat, 0.46, 1.28, 0.06);
+  // head and helmet
+  const head = part(body, box(0.38, 0.36, 0.38), skinMat, 0, 1.79, 0);
+  part(head, box(0.3, 0.1, 0.06), glassMat, 0, 0.02, 0.2);              // visor / goggles
 
-  // weapon held in front of the chest, class-flavoured silhouette
+  // arms
+  const armGeo = box(0.2 * bulk, 0.62, 0.22);
+  const armL = part(body, armGeo, teamMat, -0.47 * bulk, 1.28, 0.06);
+  const armR = part(body, armGeo, teamMat, 0.47 * bulk, 1.28, 0.06);
+  part(armL, box(0.22 * bulk, 0.16, 0.24), gearMat, 0, 0.28, 0);        // shoulder pad
+  part(armR, box(0.22 * bulk, 0.16, 0.24), gearMat, 0, 0.28, 0);
+
+  // ---- class-specific silhouette
+  switch (classId) {
+    case 'gunner':
+      part(head, box(0.5, 0.2, 0.46), teamMat, 0, 0.21, 0);             // heavy helmet
+      part(head, box(0.44, 0.14, 0.1), darkMat, 0, 0.06, 0.22);         // face guard
+      part(body, box(0.34, 0.5, 0.3), darkMat, 0, 1.28, -0.36);         // ammo drum
+      part(body, box(0.2, 0.2, 0.5), gearMat, 0.2, 1.1, -0.3);          // feed belt
+      part(armL, box(0.28, 0.3, 0.3), gearMat, -0.06, 0.1, 0);          // arm plate
+      break;
+    case 'medic':
+      part(head, box(0.42, 0.12, 0.42), teamMat, 0, 0.2, 0);            // flat cap
+      part(head, box(0.2, 0.06, 0.1), accentMat, 0, 0.2, 0.22);         // cap badge
+      part(body, box(0.42, 0.42, 0.24), accentMat, 0, 1.3, -0.32);      // medical pack
+      part(body, box(0.22, 0.07, 0.03), mat(0xd6402f), 0, 1.32, -0.45); // red cross
+      part(body, box(0.07, 0.22, 0.03), mat(0xd6402f), 0, 1.32, -0.45);
+      break;
+    case 'sniper':
+      part(head, box(0.44, 0.18, 0.44), accentMat, 0, 0.2, 0);          // hood
+      part(head, box(0.2, 0.14, 0.14), accentMat, -0.22, 0.12, -0.1);   // ghillie tufts
+      part(head, box(0.16, 0.12, 0.12), accentMat, 0.24, 0.16, 0.05);
+      part(body, box(0.6, 0.5, 0.12), accentMat, 0, 0.85, -0.28);       // coat tail
+      part(body, box(0.14, 0.5, 0.14), gearMat, -0.3, 1.3, -0.3);       // spare barrel
+      break;
+    case 'stealth':
+      part(head, box(0.42, 0.2, 0.44), darkMat, 0, 0.18, -0.02);        // hood
+      part(head, box(0.34, 0.16, 0.08), glassMat, 0, 0.0, 0.2);         // full visor
+      part(body, box(0.66, 0.44, 0.1), darkMat, 0, 1.15, -0.3);         // short cloak
+      part(body, box(0.16, 0.3, 0.12), accentMat, -0.3, 1.0, -0.2);     // thigh holster
+      break;
+    default: // soldier
+      part(head, box(0.44, 0.18, 0.44), teamMat, 0, 0.2, 0);            // helmet
+      part(head, box(0.1, 0.1, 0.12), accentMat, 0.2, 0.18, 0);         // helmet strap clip
+      part(body, box(0.46, 0.44, 0.22), accentMat, 0, 1.3, -0.31);      // rucksack
+      part(body, box(0.14, 0.18, 0.14), darkMat, -0.26, 1.08, -0.3);    // grenades
+      part(body, box(0.14, 0.18, 0.14), darkMat, 0.26, 1.08, -0.3);
+  }
+
+  // weapon held in front of the chest
   const gun = new THREE.Group();
   gun.position.set(0.3, 1.24, 0.34);
   body.add(gun);
-  const gunMat = mat(0x2f353d);
   if (classId === 'sniper') {
-    part(gun, new THREE.BoxGeometry(0.1, 0.12, 1.5), gunMat, 0, 0, 0.45);
-    part(gun, new THREE.BoxGeometry(0.08, 0.16, 0.34), gunMat, 0, 0.16, 0.25);
+    part(gun, box(0.1, 0.12, 1.5), gunMat, 0, 0, 0.45);
+    part(gun, box(0.08, 0.16, 0.34), gunMat, 0, 0.16, 0.25);
+    part(gun, box(0.06, 0.06, 0.12), glassMat, 0, 0.16, 0.44);
   } else if (classId === 'gunner') {
-    part(gun, new THREE.BoxGeometry(0.22, 0.22, 1.1), gunMat, 0, 0, 0.35);
-    part(gun, new THREE.BoxGeometry(0.3, 0.3, 0.3), accentMat, 0, 0, 0.0);
+    part(gun, box(0.22, 0.22, 1.1), gunMat, 0, 0, 0.35);
+    part(gun, box(0.3, 0.3, 0.3), accentMat, 0, 0, 0.0);
+    part(gun, box(0.1, 0.1, 0.5), darkMat, 0, -0.16, 0.3);
   } else if (classId === 'stealth') {
-    part(gun, new THREE.BoxGeometry(0.16, 0.16, 0.8), gunMat, 0, 0, 0.3);
+    part(gun, box(0.18, 0.18, 0.8), gunMat, 0, 0, 0.3);
+    part(gun, box(0.12, 0.2, 0.2), darkMat, 0, -0.12, 0.05);
   } else if (classId === 'medic') {
-    part(gun, new THREE.BoxGeometry(0.12, 0.2, 0.62), gunMat, 0, 0, 0.26);
+    part(gun, box(0.12, 0.2, 0.62), gunMat, 0, 0, 0.26);
+    part(gun, box(0.1, 0.1, 0.16), accentMat, 0, 0.1, 0.3);
   } else {
-    part(gun, new THREE.BoxGeometry(0.13, 0.18, 0.95), gunMat, 0, 0, 0.32);
-    part(gun, new THREE.BoxGeometry(0.1, 0.22, 0.2), gunMat, 0, -0.16, 0.1);
+    part(gun, box(0.13, 0.18, 0.95), gunMat, 0, 0, 0.32);
+    part(gun, box(0.1, 0.22, 0.2), gunMat, 0, -0.16, 0.1);
+    part(gun, box(0.08, 0.08, 0.22), darkMat, 0, 0.11, 0.26);
   }
 
   const muzzle = new THREE.Object3D();
@@ -80,7 +151,7 @@ export function makeFighterMesh(teamColor, classId) {
   gun.add(muzzle);
 
   root.userData.parts = { body, legL, legR, torso, head, armL, armR, gun, muzzle };
-  root.userData.materials = [teamMat, gearMat, skinMat, accentMat, gunMat];
+  root.userData.materials = [teamMat, gearMat, skinMat, accentMat, gunMat, darkMat, glassMat];
   return root;
 }
 

@@ -1,6 +1,6 @@
 # Vendored game-development skills
 
-Project-scoped skills for the browser shooter in `projects/blitz-brigade-remake/`.
+Project-scoped skills for the browser shooter in `projects/frontline-squad/`.
 They are **not** part of the `ui-ux-pro-max` product skill or its marketplace plugin —
 that is why they live here and not in the repository's root `.claude/skills/`.
 
@@ -29,7 +29,8 @@ Practical consequences:
 - `threejs-qa-release` mentions `scripts/inspect-threejs-canvas.mjs`. Absent for the same reason;
   the equivalent checks live in this project's test scripts.
 - Upstream skills target three.js `^0.184` with the `three/addons/*` alias. This project vendors
-  three.js `0.160` at `vendor/three.module.min.js` and imports it through an import map.
+  three.js `0.186` at `vendor/three.module.min.js` with addons under `vendor/addons/`,
+  wired through an import map (`three`, `three/addons/`).
   Verify every recipe against that version before adopting it.
 
 ## Updating
