@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover" />
+<title>Blitz Brigade — Open Remake</title>
+<link rel="stylesheet" href="css/style.css" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💥</text></svg>" />
+<script type="importmap">
+{ "imports": { "three": "./vendor/three.module.min.js" } }
+</script>
+</head>
+<body>
+
+<canvas id="view"></canvas>
+<div id="boot-error" class="hidden"></div>
+
+<!-- ───────────────────────────── HUD ───────────────────────────── -->
+<div id="hud" class="hidden">
+  <div id="damage-flash"></div>
+  <div id="scope-overlay" class="hidden"><div class="scope-ring"></div></div>
+
+  <div id="crosshair"><i class="l t"></i><i class="l r"></i><i class="l b"></i><i class="l le"></i></div>
+  <div id="hitmarker">✕</div>
+  <div id="damage-indicators"></div>
+  <div id="floaters"></div>
+
+  <header id="topbar">
+    <div class="team-score alpha">
+      <span class="tname">Rising Sun</span>
+      <span id="score-alpha" class="value">0</span>
+      <div class="bar"><i id="bar-alpha"></i></div>
+    </div>
+    <div class="clock">
+      <span id="timer">08:00</span>
+      <div id="points-strip" class="hidden"></div>
+    </div>
+    <div class="team-score bravo">
+      <span class="tname">Royal Marines</span>
+      <span id="score-bravo" class="value">0</span>
+      <div class="bar"><i id="bar-bravo"></i></div>
+    </div>
+  </header>
+
+  <div id="notice"></div>
+  <div id="killfeed"></div>
+  <canvas id="minimap" width="200" height="200"></canvas>
+
+  <footer id="bottombar">
+    <div class="panel health-panel">
+      <span id="class-chip">🎖️ Soldier</span>
+      <div class="health-bar"><i id="health-fill"></i><span id="health-text">100</span></div>
+    </div>
+
+    <div class="panel ability-panel" id="ability-panel">
+      <div id="ability-icon">💣</div>
+      <div class="ability-meta">
+        <span id="ability-name">Splittergranate</span>
+        <span id="ability-cooldown">BEREIT</span>
+      </div>
+    </div>
+
+    <div class="panel ammo-panel">
+      <span id="weapon-name">MK-7 Assault</span>
+      <div class="ammo"><span id="ammo-current">30</span><span id="ammo-mag">/ 30</span></div>
+    </div>
+  </footer>
+
+  <div id="streak"></div>
+
+  <div id="respawn" class="hidden">
+    <h2>AUSGESCHALTET</h2>
+    <p id="killer-info"></p>
+    <div class="respawn-timer">Einsatzbereit in <b id="respawn-time">4.5</b>s</div>
+    <p class="hint">Klasse für das nächste Leben — Taste 1–5 oder Klick</p>
+    <div id="respawn-classes"></div>
+  </div>
+
+  <!-- touch controls, only shown on coarse pointers -->
+  <div id="touch-ui">
+    <div id="look-pad"></div>
+    <div id="stick"><div id="stick-knob"></div></div>
+    <button id="btn-fire">FEUER</button>
+    <button id="btn-jump">⤒</button>
+    <button id="btn-reload">⟳</button>
+    <button id="btn-ability">★</button>
+  </div>
+</div>
+
+<div id="scoreboard" class="hidden"></div>
+
+<!-- ──────────────────────────── MENU ───────────────────────────── -->
+<section id="menu">
+  <div class="menu-inner">
+    <h1 class="logo"><span>BLITZ</span> BRIGADE <small>open remake</small></h1>
+    <p class="sub">Fan-Nachbau des eingestellten Gameloft-Shooters — eigene Engine, eigene Assets, 100 % offline im Browser.</p>
+
+    <h2 class="section-title">Klasse wählen</h2>
+    <div id="class-grid" class="grid"></div>
+
+    <div class="options">
+      <div class="opt">
+        <h3>Modus</h3>
+        <div id="mode-select" class="chips">
+          <button class="chip active" data-value="tdm">Team Deathmatch</button>
+          <button class="chip" data-value="domination">Domination</button>
+        </div>
+      </div>
+      <div class="opt">
+        <h3>Teamgröße</h3>
+        <div id="size-select" class="chips">
+          <button class="chip" data-value="4">4 v 4</button>
+          <button class="chip active" data-value="6">6 v 6</button>
+          <button class="chip" data-value="8">8 v 8</button>
+        </div>
+      </div>
+      <div class="opt">
+        <h3>Bot-Stärke</h3>
+        <div id="diff-select" class="chips">
+          <button class="chip" data-value="rookie">Rekrut</button>
+          <button class="chip active" data-value="veteran">Veteran</button>
+          <button class="chip" data-value="elite">Elite</button>
+        </div>
+      </div>
+      <div class="opt sliders">
+        <h3>Einstellungen</h3>
+        <label>Mausempfindlichkeit <input id="sens-slider" type="range" min="0.5" max="6" step="0.1" value="2.2" /> <b id="sens-value">2.2</b></label>
+        <label>Lautstärke <input id="vol-slider" type="range" min="0" max="100" step="1" value="55" /> <b id="vol-value">55</b></label>
+      </div>
+    </div>
+
+    <button id="start-btn" class="primary">EINSATZ STARTEN</button>
+
+    <div class="controls-help">
+      <span><b>WASD</b> Bewegen</span><span><b>Maus</b> Zielen</span><span><b>Links</b> Feuern</span>
+      <span><b>Rechts</b> Zielfernrohr (Sniper)</span><span><b>Leer</b> Springen</span><span><b>Shift</b> Sprint</span>
+      <span><b>R</b> Nachladen</span><span><b>Q/F</b> Fähigkeit</span><span><b>Tab</b> Punkte</span><span><b>Esc</b> Pause</span>
+    </div>
+    <p class="legal">Inoffizielles, nicht-kommerzielles Fanprojekt. Kein Code, keine Grafiken und keine Marken von Gameloft — alles hier ist neu gebaut.</p>
+  </div>
+</section>
+
+<!-- ─────────────────────────── PAUSE ───────────────────────────── -->
+<section id="pause" class="hidden overlay">
+  <div class="dialog">
+    <h2>PAUSE</h2>
+    <button id="resume-btn" class="primary">Weiterkämpfen</button>
+    <button id="quit-btn" class="ghost">Zurück zum Menü</button>
+  </div>
+</section>
+
+<!-- ────────────────────────── MATCH END ────────────────────────── -->
+<section id="match-end" class="hidden overlay">
+  <div class="dialog wide">
+    <h2 id="match-end-title">SIEG</h2>
+    <p id="match-end-sub"></p>
+    <div id="match-end-stats" class="stats-row"></div>
+    <div class="dialog-actions">
+      <button id="rematch-btn" class="primary">Revanche</button>
+      <button id="menu-btn" class="ghost">Menü</button>
+    </div>
+  </div>
+</section>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
