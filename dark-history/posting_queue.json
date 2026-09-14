@@ -83,11 +83,13 @@
     },
     {
       "script": "24 - Lizzie Borden (1892)",
-      "status": "pending",
+      "status": "posted",
       "video_url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3G8m1bxNBqhjlyBCY2gFUlzpzbo/148f16bb-9266-4a90-a3af-d9961e47c992.mp4",
       "title": "Lizzie Borden 1892 — The jury took an hour to acquit her. Nobody else was ever charged. #darkhistory #lizzieborden #truecrime",
       "music_sound_id": "6595184426152364801",
-      "duration_sec": 84.0
+      "duration_sec": 84.0,
+      "publish_id": "v_pub_url~v2.7685174746300057632",
+      "posted_at": "2026-09-14T00:09:00Z"
     },
     {
       "script": "25 - The Lost Colony of Roanoke (1587)",
