@@ -321,6 +321,7 @@ class Game {
 
     for (const f of this.fighters) f.spawn(this.arena.respawnPosition(f.team));
 
+    this.fx.clearDecals();
     this.hud.reset();
     this.hud.el.root.classList.remove('hidden');
     $('#menu').classList.add('hidden');

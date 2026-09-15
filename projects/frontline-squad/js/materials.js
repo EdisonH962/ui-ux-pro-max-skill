@@ -190,21 +190,76 @@ const PAINTERS = {
 };
 
 /** Per-material surface response; cartoon surfaces stay rough and non-metallic. */
+/**
+ * Derives a tangent-space normal map from the painted albedo by running a Sobel
+ * filter over its luminance. Painted detail (plaster patches, tile edges, plank
+ * gaps) then catches light as real relief instead of staying perfectly flat —
+ * this is the single biggest reason untextured box geometry reads as a toy.
+ */
+function normalFromCanvas(source, strength = 2.0) {
+  const size = source.width;
+  const src = source.getContext('2d').getImageData(0, 0, size, size).data;
+  const [out, g] = canvas(size);
+  const img = g.createImageData(size, size);
+
+  const lum = new Float32Array(size * size);
+  for (let i = 0; i < size * size; i++) {
+    lum[i] = (src[i * 4] * 0.299 + src[i * 4 + 1] * 0.587 + src[i * 4 + 2] * 0.114) / 255;
+  }
+  const at = (x, y) => lum[((y + size) % size) * size + ((x + size) % size)];
+
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const dx = (at(x - 1, y - 1) + 2 * at(x - 1, y) + at(x - 1, y + 1))
+               - (at(x + 1, y - 1) + 2 * at(x + 1, y) + at(x + 1, y + 1));
+      const dy = (at(x - 1, y - 1) + 2 * at(x, y - 1) + at(x + 1, y - 1))
+               - (at(x - 1, y + 1) + 2 * at(x, y + 1) + at(x + 1, y + 1));
+      let nx = dx * strength, ny = dy * strength, nz = 1;
+      const len = Math.hypot(nx, ny, nz);
+      nx /= len; ny /= len; nz /= len;
+      const i = (y * size + x) * 4;
+      img.data[i] = (nx * 0.5 + 0.5) * 255;
+      img.data[i + 1] = (ny * 0.5 + 0.5) * 255;
+      img.data[i + 2] = (nz * 0.5 + 0.5) * 255;
+      img.data[i + 3] = 255;
+    }
+  }
+  g.putImageData(img, 0, 0);
+  return out;
+}
+
+/** Roughness from the same luminance: darker, dirtier areas scatter more light. */
+function roughnessFromCanvas(source, min = 0.62, max = 1.0) {
+  const size = source.width;
+  const src = source.getContext('2d').getImageData(0, 0, size, size).data;
+  const [out, g] = canvas(size);
+  const img = g.createImageData(size, size);
+  for (let i = 0; i < size * size; i++) {
+    const l = (src[i * 4] * 0.299 + src[i * 4 + 1] * 0.587 + src[i * 4 + 2] * 0.114) / 255;
+    const r = Math.round(255 * (max - (max - min) * l));
+    img.data[i * 4] = img.data[i * 4 + 1] = img.data[i * 4 + 2] = r;
+    img.data[i * 4 + 3] = 255;
+  }
+  g.putImageData(img, 0, 0);
+  return out;
+}
+
 const SURFACE = {
-  sand:        { roughness: 1.0, metalness: 0.0, tile: 4.0, color: 0xffffff },
-  plaster:     { roughness: 0.92, metalness: 0.0, tile: 3.0, color: 0xffffff },
-  plasterWarm: { roughness: 0.92, metalness: 0.0, tile: 3.0, color: 0xffffff },
-  terracotta:  { roughness: 0.8, metalness: 0.0, tile: 2.2, color: 0xffffff },
-  wood:        { roughness: 0.88, metalness: 0.0, tile: 1.6, color: 0xffffff },
-  metal:       { roughness: 0.45, metalness: 0.65, tile: 1.6, color: 0xffffff },
-  canvasCloth: { roughness: 0.95, metalness: 0.0, tile: 1.6, color: 0xffffff },
-  stone:       { roughness: 0.95, metalness: 0.0, tile: 2.4, color: 0xffffff },
+  sand:        { roughness: 1.0, metalness: 0.0, tile: 4.0, color: 0xffffff, normal: 0.8 },
+  plaster:     { roughness: 0.92, metalness: 0.0, tile: 3.0, color: 0xffffff, normal: 1.1 },
+  plasterWarm: { roughness: 0.92, metalness: 0.0, tile: 3.0, color: 0xffffff, normal: 1.1 },
+  terracotta:  { roughness: 0.8, metalness: 0.0, tile: 2.2, color: 0xffffff, normal: 1.9 },
+  wood:        { roughness: 0.88, metalness: 0.0, tile: 1.6, color: 0xffffff, normal: 1.5 },
+  metal:       { roughness: 0.45, metalness: 0.65, tile: 1.6, color: 0xffffff, normal: 1.0 },
+  canvasCloth: { roughness: 0.95, metalness: 0.0, tile: 1.6, color: 0xffffff, normal: 1.2 },
+  stone:       { roughness: 0.95, metalness: 0.0, tile: 2.4, color: 0xffffff, normal: 2.2 },
 };
 
 export class MaterialLibrary {
   constructor(renderer) {
     this.renderer = renderer;
     this.textures = new Map();
+    this.maps = new Map();
     this.materials = new Map();
     this.colored = new Map();
     this.external = null;
@@ -240,26 +295,50 @@ export class MaterialLibrary {
 
   texture(name) {
     if (this.textures.has(name)) return this.textures.get(name);
+    this.buildMaps(name);
+    return this.textures.get(name) || null;
+  }
+
+  /** Albedo, normal and roughness for one surface, all painted from the same source. */
+  buildMaps(name) {
     const painter = PAINTERS[name];
     if (!painter) return null;
-    const tex = new THREE.CanvasTexture(seamless(painter));
-    tex.colorSpace = THREE.SRGBColorSpace;
-    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-    tex.anisotropy = Math.min(8, this.renderer.capabilities.getMaxAnisotropy());
-    this.textures.set(name, tex);
-    return tex;
+    const source = seamless(painter);
+    const aniso = Math.min(8, this.renderer.capabilities.getMaxAnisotropy());
+
+    const wrap = (canvasEl, srgb) => {
+      const tex = new THREE.CanvasTexture(canvasEl);
+      if (srgb) tex.colorSpace = THREE.SRGBColorSpace;
+      tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+      tex.anisotropy = aniso;
+      return tex;
+    };
+
+    const albedo = wrap(source, true);
+    this.textures.set(name, albedo);
+    this.maps.set(name, {
+      normal: wrap(normalFromCanvas(source), false),
+      roughness: wrap(roughnessFromCanvas(source), false),
+    });
+    return albedo;
   }
 
   /** Shared material per surface name — UVs are scaled per mesh instead of the map. */
   get(name) {
     if (this.materials.has(name)) return this.materials.get(name);
     const surf = SURFACE[name] || SURFACE.plaster;
+    const map = this.texture(name);
+    const extra = this.maps.get(name);
     const mat = new THREE.MeshStandardMaterial({
-      map: this.texture(name),
+      map,
+      normalMap: extra ? extra.normal : null,
+      normalScale: new THREE.Vector2(surf.normal ?? 1, surf.normal ?? 1),
+      roughnessMap: extra ? extra.roughness : null,
       color: surf.color,
       roughness: surf.roughness,
       metalness: surf.metalness,
       envMapIntensity: 0.35,
+      vertexColors: true,        // baked ambient occlusion rides in vertex colours
     });
     this.materials.set(name, mat);
     return mat;
@@ -285,6 +364,56 @@ export class MaterialLibrary {
     this.colored.set(key, mat);
     return mat;
   }
+}
+
+/**
+ * Projects UVs planar per face, using each vertex's dominant normal axis. Unlike the
+ * BoxGeometry-specific version below this works on bevelled and rounded geometry too,
+ * and keeps texel density constant no matter how large the piece is.
+ */
+export function projectPlanarUVs(geometry, tile = 1) {
+  const pos = geometry.attributes.position;
+  const nrm = geometry.attributes.normal;
+  const uv = geometry.attributes.uv;
+  for (let i = 0; i < pos.count; i++) {
+    const nx = Math.abs(nrm.getX(i)), ny = Math.abs(nrm.getY(i)), nz = Math.abs(nrm.getZ(i));
+    let u, v;
+    if (ny >= nx && ny >= nz) { u = pos.getX(i); v = pos.getZ(i); }        // floors and roofs
+    else if (nx >= nz) { u = pos.getZ(i); v = pos.getY(i); }               // walls facing X
+    else { u = pos.getX(i); v = pos.getY(i); }                             // walls facing Z
+    uv.setXY(i, u / tile, v / tile);
+  }
+  uv.needsUpdate = true;
+  return geometry;
+}
+
+/**
+ * Bakes a cheap ambient occlusion term into vertex colours: darker towards the base of
+ * every piece and on downward faces. It costs nothing at runtime — important on phones,
+ * where a screen-space AO pass is not affordable — and stops objects from looking like
+ * they are pasted onto the ground.
+ */
+export function bakeVertexAO(geometry, { height = 1.3, strength = 0.4, downward = 0.22 } = {}) {
+  const pos = geometry.attributes.position;
+  const nrm = geometry.attributes.normal;
+  geometry.computeBoundingBox();
+  const minY = geometry.boundingBox.min.y;
+  const colors = new Float32Array(pos.count * 3);
+  for (let i = 0; i < pos.count; i++) {
+    const h = Math.min(1, (pos.getY(i) - minY) / height);
+    let ao = 1 - strength * (1 - h) * (1 - h);
+    if (nrm.getY(i) < -0.45) ao *= 1 - downward;
+    colors[i * 3] = colors[i * 3 + 1] = colors[i * 3 + 2] = ao;
+  }
+  geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  return geometry;
+}
+
+/** Flat white vertex colours for geometry that needs the attribute but no shading. */
+export function neutralVertexColors(geometry) {
+  const count = geometry.attributes.position.count;
+  geometry.setAttribute('color', new THREE.BufferAttribute(new Float32Array(count * 3).fill(1), 3));
+  return geometry;
 }
 
 /**

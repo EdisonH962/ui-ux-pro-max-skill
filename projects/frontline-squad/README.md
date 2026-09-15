@@ -75,12 +75,45 @@ js/audio.js         Alle Sounds synthetisch über WebAudio erzeugt
 js/main.js          Renderer, Menü, Matchaufbau, Spielschleife
 ```
 
+### Mobiles Budget
+
+Zielgerät ist das Handy, und dort limitieren **Draw Calls**, nicht Dreiecke. Gemessen im
+Telefon-Viewport (390×844, dpr 2), Spiel läuft mit 12 Kämpfern:
+
+| Stand | Draw Calls | Dreiecke |
+| --- | --- | --- |
+| vor der Optimierung | 234 | 36k |
+| statische Geometrie gebatcht | 139 | 36k |
+| Kämpfer auf ein Material verschmolzen | 100 | 39k |
+| farbige Props mitgebatcht | 80 | 42k |
+
+Drei Maßnahmen bringen das:
+
+1. **`World.batchStatics()`** fasst alle unbeweglichen Teile pro Material zu je einem Mesh
+   zusammen — aus 406 Einzelmeshes werden 12 Batches.
+2. **Kämpfer** bestehen aus einem einzigen Material mit Vertex-Farben; nur die animierten
+   Gruppen (Beine, Arme, Kopf, Waffe) bleiben getrennt. 24 Meshes pro Figur wurden 7.
+3. **Einschusslöcher** liegen in einer `InstancedMesh` — beliebig viele Treffer kosten
+   genau einen Draw Call.
+
+Weil die Sichtprüfung nicht mehr gegen Mesh-Dreiecke laufen kann, sobald Geometrie
+verschmolzen ist, testet `World.raycast()` die Kollisionsboxen analytisch (Slab-Methode).
+Das ist für Quadergeometrie exakt und deutlich billiger — beim Aufbau des Wegnetzes
+laufen mehrere tausend Sichtlinien durch diese Funktion.
+
 ### Grafikpipeline
 
 Gerendert wird linear in ein Halbfloat-Target: `RenderPass` → Bloom → Vignette/Grade →
 `OutputPass` (dort passieren Tone Mapping und Farbraum). Materialien sind `MeshStandard`
 mit neutralem IBL aus `RoomEnvironment`, Sonne plus Hemisphärenlicht in physikalischen
 Einheiten, ACES-Tone-Mapping bei Belichtung 0.95.
+
+Aus jeder gezeichneten Textur werden zusätzlich eine **Normal-Map** (Sobel über die
+Luminanz) und eine **Roughness-Map** abgeleitet. Deshalb hat Putz Relief und Ziegel
+Fugentiefe, ohne dass eine einzige Bilddatei ausgeliefert wird. Kanten sind leicht
+gefast (`RoundedBoxGeometry`), und eine **Umgebungsverschattung ist in Vertex-Farben
+gebacken** — Kontaktverschattung ohne Laufzeitkosten, weil ein Screen-Space-Pass auf
+Telefonen nicht im Budget liegt.
 
 Jede Oberfläche bekommt ihre Textur aus `js/materials.js`, gezeichnet in ein Canvas und
 kachelbar gemacht. Die UVs werden **pro Mesh** auf die Boxmaße umgerechnet

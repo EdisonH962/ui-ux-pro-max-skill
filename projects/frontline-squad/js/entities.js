@@ -2,6 +2,7 @@
 // Contains the blocky cartoon character mesh, movement/collision, and shooting.
 
 import * as THREE from 'three';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { PHYSICS, RULES, TEAMS, ENEMY_OF } from './config.js';
 
 const SKIN = 0xd9a271;
@@ -15,143 +16,174 @@ const CLASS_ACCENT = {
   stealth: 0x2c3138,
 };
 
-function mat(color, opts = {}) {
-  return new THREE.MeshStandardMaterial({
-    color,
-    roughness: opts.roughness ?? 0.82,
-    metalness: opts.metalness ?? 0.0,
-    emissive: opts.emissive ?? 0x000000,
-    emissiveIntensity: opts.emissiveIntensity ?? 1,
-    envMapIntensity: 0.3,
-    flatShading: !!opts.flatShading,
-  });
-}
-
-function part(group, geo, material, x, y, z) {
-  const m = new THREE.Mesh(geo, material);
-  m.position.set(x, y, z);
-  m.castShadow = true;
-  m.receiveShadow = true;
-  group.add(m);
-  return m;
-}
-
-const box = (w, h, d) => new THREE.BoxGeometry(w, h, d);
-
 /**
- * Blocky cartoon fighter. Each class gets its own silhouette — bulk, headgear and
- * back-mounted gear — so the class reads at a glance from across the map, which
- * matters more in a team shooter than surface detail does.
+ * Fighters are built as a single material with per-vertex colours, then merged down to
+ * one mesh per animated group. A class fighter used to be ~24 separate meshes; on a
+ * phone, twelve of those is 300 draw calls before the map is even drawn.
  */
+const PIVOTS = {
+  body: [0, 0, 0],
+  legL: [-0.16, 0.52, 0],
+  legR: [0.16, 0.52, 0],
+  armL: [-0.47, 1.28, 0.06],
+  armR: [0.47, 1.28, 0.06],
+  head: [0, 1.79, 0],
+  gun: [0.3, 1.24, 0.34],
+};
+
+/** Writes a flat colour plus a cheap top-down AO gradient into a geometry. */
+function tint(geo, hex, aoBase) {
+  const c = new THREE.Color(hex);
+  const pos = geo.attributes.position;
+  const colors = new Float32Array(pos.count * 3);
+  for (let i = 0; i < pos.count; i++) {
+    // lower parts of the body sit in their own shadow
+    const shade = THREE.MathUtils.clamp(0.72 + (pos.getY(i) - aoBase) * 0.18, 0.72, 1);
+    colors[i * 3] = c.r * shade;
+    colors[i * 3 + 1] = c.g * shade;
+    colors[i * 3 + 2] = c.b * shade;
+  }
+  geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  return geo;
+}
+
 export function makeFighterMesh(teamColor, classId) {
   const root = new THREE.Group();
   const body = new THREE.Group();
   root.add(body);
 
-  const teamMat = mat(teamColor, { emissive: new THREE.Color(teamColor).multiplyScalar(0.12) });
-  const gearMat = mat(GEAR, { roughness: 0.7, metalness: 0.15 });
-  const skinMat = mat(SKIN, { roughness: 0.9 });
-  const accentMat = mat(CLASS_ACCENT[classId] || 0x777777, { roughness: 0.75 });
-  const darkMat = mat(0x20262e, { roughness: 0.6, metalness: 0.25 });
-  const gunMat = mat(0x2f353d, { roughness: 0.45, metalness: 0.55 });
-  const glassMat = mat(0x0f1a24, { roughness: 0.15, metalness: 0.4, emissive: 0x16303f });
+  const accent = CLASS_ACCENT[classId] || 0x777777;
+  const DARK = 0x20262e;
+  const GUNMETAL = 0x2f353d;
+  const GLASS = 0x16303f;
 
   const heavy = classId === 'gunner';
   const slim = classId === 'stealth' || classId === 'medic';
   const bulk = heavy ? 1.22 : slim ? 0.9 : 1;
 
+  const buckets = { body: [], legL: [], legR: [], armL: [], armR: [], head: [], gun: [] };
+
+  /** Adds a box to a group, positioned in body space. */
+  const add = (bucket, w, h, d, x, y, z, color) => {
+    const geo = new THREE.BoxGeometry(w, h, d);
+    const [px, py, pz] = PIVOTS[bucket];
+    geo.translate(x - px, y - py, z - pz);
+    tint(geo, color, bucket === 'body' ? 0 : -0.4);
+    buckets[bucket].push(geo);
+  };
+
   // legs and boots
-  const legGeo = box(0.24 * bulk, 0.66, 0.28);
-  const legL = part(body, legGeo, gearMat, -0.16 * bulk, 0.52, 0);
-  const legR = part(body, legGeo, gearMat, 0.16 * bulk, 0.52, 0);
-  part(legL, box(0.28 * bulk, 0.22, 0.36), darkMat, 0, -0.34, 0.04);
-  part(legR, box(0.28 * bulk, 0.22, 0.36), darkMat, 0, -0.34, 0.04);
+  for (const [bucket, sx] of [['legL', -1], ['legR', 1]]) {
+    add(bucket, 0.24 * bulk, 0.66, 0.28, sx * 0.16 * bulk, 0.52, 0, DARK);
+    add(bucket, 0.28 * bulk, 0.22, 0.36, sx * 0.16 * bulk, 0.18, 0.04, GEAR);
+  }
 
   // torso, webbing, shoulders
-  const torso = part(body, box(0.72 * bulk, 0.78, 0.44 * bulk), teamMat, 0, 1.22, 0);
-  part(body, box(0.76 * bulk, 0.3, 0.47 * bulk), accentMat, 0, 0.98, 0);
-  part(body, box(0.3, 0.16, 0.2), darkMat, -0.2, 0.96, 0.24);          // belt pouch
-  part(body, box(0.3, 0.16, 0.2), darkMat, 0.2, 0.96, 0.24);
-  part(body, box(0.86 * bulk, 0.16, 0.46 * bulk), teamMat, 0, 1.55, 0); // shoulder line
+  add('body', 0.72 * bulk, 0.78, 0.44 * bulk, 0, 1.22, 0, teamColor);
+  add('body', 0.76 * bulk, 0.3, 0.47 * bulk, 0, 0.98, 0, accent);
+  add('body', 0.3, 0.16, 0.2, -0.2, 0.96, 0.24, DARK);
+  add('body', 0.3, 0.16, 0.2, 0.2, 0.96, 0.24, DARK);
+  add('body', 0.86 * bulk, 0.16, 0.46 * bulk, 0, 1.55, 0, teamColor);
 
-  // head and helmet
-  const head = part(body, box(0.38, 0.36, 0.38), skinMat, 0, 1.79, 0);
-  part(head, box(0.3, 0.1, 0.06), glassMat, 0, 0.02, 0.2);              // visor / goggles
+  // head with visor
+  add('head', 0.38, 0.36, 0.38, 0, 1.79, 0, SKIN);
+  add('head', 0.3, 0.1, 0.06, 0, 1.81, 0.2, GLASS);
 
-  // arms
-  const armGeo = box(0.2 * bulk, 0.62, 0.22);
-  const armL = part(body, armGeo, teamMat, -0.47 * bulk, 1.28, 0.06);
-  const armR = part(body, armGeo, teamMat, 0.47 * bulk, 1.28, 0.06);
-  part(armL, box(0.22 * bulk, 0.16, 0.24), gearMat, 0, 0.28, 0);        // shoulder pad
-  part(armR, box(0.22 * bulk, 0.16, 0.24), gearMat, 0, 0.28, 0);
+  // arms with shoulder pads
+  for (const [bucket, sx] of [['armL', -1], ['armR', 1]]) {
+    add(bucket, 0.2 * bulk, 0.62, 0.22, sx * 0.47 * bulk, 1.28, 0.06, teamColor);
+    add(bucket, 0.22 * bulk, 0.16, 0.24, sx * 0.47 * bulk, 1.56, 0.06, GEAR);
+  }
 
-  // ---- class-specific silhouette
+  // ---- class silhouette
   switch (classId) {
     case 'gunner':
-      part(head, box(0.5, 0.2, 0.46), teamMat, 0, 0.21, 0);             // heavy helmet
-      part(head, box(0.44, 0.14, 0.1), darkMat, 0, 0.06, 0.22);         // face guard
-      part(body, box(0.34, 0.5, 0.3), darkMat, 0, 1.28, -0.36);         // ammo drum
-      part(body, box(0.2, 0.2, 0.5), gearMat, 0.2, 1.1, -0.3);          // feed belt
-      part(armL, box(0.28, 0.3, 0.3), gearMat, -0.06, 0.1, 0);          // arm plate
+      add('head', 0.5, 0.2, 0.46, 0, 2.0, 0, teamColor);
+      add('head', 0.44, 0.14, 0.1, 0, 1.85, 0.22, DARK);
+      add('body', 0.34, 0.5, 0.3, 0, 1.28, -0.36, DARK);
+      add('body', 0.2, 0.2, 0.5, 0.2, 1.1, -0.3, GEAR);
+      add('armL', 0.28, 0.3, 0.3, -0.53, 1.38, 0.06, GEAR);
       break;
     case 'medic':
-      part(head, box(0.42, 0.12, 0.42), teamMat, 0, 0.2, 0);            // flat cap
-      part(head, box(0.2, 0.06, 0.1), accentMat, 0, 0.2, 0.22);         // cap badge
-      part(body, box(0.42, 0.42, 0.24), accentMat, 0, 1.3, -0.32);      // medical pack
-      part(body, box(0.22, 0.07, 0.03), mat(0xd6402f), 0, 1.32, -0.45); // red cross
-      part(body, box(0.07, 0.22, 0.03), mat(0xd6402f), 0, 1.32, -0.45);
+      add('head', 0.42, 0.12, 0.42, 0, 1.99, 0, teamColor);
+      add('head', 0.2, 0.06, 0.1, 0, 1.99, 0.22, accent);
+      add('body', 0.42, 0.42, 0.24, 0, 1.3, -0.32, accent);
+      add('body', 0.22, 0.07, 0.03, 0, 1.32, -0.45, 0xd6402f);
+      add('body', 0.07, 0.22, 0.03, 0, 1.32, -0.45, 0xd6402f);
       break;
     case 'sniper':
-      part(head, box(0.44, 0.18, 0.44), accentMat, 0, 0.2, 0);          // hood
-      part(head, box(0.2, 0.14, 0.14), accentMat, -0.22, 0.12, -0.1);   // ghillie tufts
-      part(head, box(0.16, 0.12, 0.12), accentMat, 0.24, 0.16, 0.05);
-      part(body, box(0.6, 0.5, 0.12), accentMat, 0, 0.85, -0.28);       // coat tail
-      part(body, box(0.14, 0.5, 0.14), gearMat, -0.3, 1.3, -0.3);       // spare barrel
+      add('head', 0.44, 0.18, 0.44, 0, 1.99, 0, accent);
+      add('head', 0.2, 0.14, 0.14, -0.22, 1.91, -0.1, accent);
+      add('head', 0.16, 0.12, 0.12, 0.24, 1.95, 0.05, accent);
+      add('body', 0.6, 0.5, 0.12, 0, 0.85, -0.28, accent);
+      add('body', 0.14, 0.5, 0.14, -0.3, 1.3, -0.3, GEAR);
       break;
     case 'stealth':
-      part(head, box(0.42, 0.2, 0.44), darkMat, 0, 0.18, -0.02);        // hood
-      part(head, box(0.34, 0.16, 0.08), glassMat, 0, 0.0, 0.2);         // full visor
-      part(body, box(0.66, 0.44, 0.1), darkMat, 0, 1.15, -0.3);         // short cloak
-      part(body, box(0.16, 0.3, 0.12), accentMat, -0.3, 1.0, -0.2);     // thigh holster
+      add('head', 0.42, 0.2, 0.44, 0, 1.97, -0.02, DARK);
+      add('head', 0.34, 0.16, 0.08, 0, 1.79, 0.2, GLASS);
+      add('body', 0.66, 0.44, 0.1, 0, 1.15, -0.3, DARK);
+      add('body', 0.16, 0.3, 0.12, -0.3, 1.0, -0.2, accent);
       break;
     default: // soldier
-      part(head, box(0.44, 0.18, 0.44), teamMat, 0, 0.2, 0);            // helmet
-      part(head, box(0.1, 0.1, 0.12), accentMat, 0.2, 0.18, 0);         // helmet strap clip
-      part(body, box(0.46, 0.44, 0.22), accentMat, 0, 1.3, -0.31);      // rucksack
-      part(body, box(0.14, 0.18, 0.14), darkMat, -0.26, 1.08, -0.3);    // grenades
-      part(body, box(0.14, 0.18, 0.14), darkMat, 0.26, 1.08, -0.3);
+      add('head', 0.44, 0.18, 0.44, 0, 1.99, 0, teamColor);
+      add('head', 0.1, 0.1, 0.12, 0.2, 1.97, 0, accent);
+      add('body', 0.46, 0.44, 0.22, 0, 1.3, -0.31, accent);
+      add('body', 0.14, 0.18, 0.14, -0.26, 1.08, -0.3, DARK);
+      add('body', 0.14, 0.18, 0.14, 0.26, 1.08, -0.3, DARK);
   }
 
-  // weapon held in front of the chest
-  const gun = new THREE.Group();
-  gun.position.set(0.3, 1.24, 0.34);
-  body.add(gun);
+  // ---- weapon
   if (classId === 'sniper') {
-    part(gun, box(0.1, 0.12, 1.5), gunMat, 0, 0, 0.45);
-    part(gun, box(0.08, 0.16, 0.34), gunMat, 0, 0.16, 0.25);
-    part(gun, box(0.06, 0.06, 0.12), glassMat, 0, 0.16, 0.44);
+    add('gun', 0.1, 0.12, 1.5, 0.3, 1.24, 0.79, GUNMETAL);
+    add('gun', 0.08, 0.16, 0.34, 0.3, 1.4, 0.59, GUNMETAL);
+    add('gun', 0.06, 0.06, 0.12, 0.3, 1.4, 0.78, GLASS);
   } else if (classId === 'gunner') {
-    part(gun, box(0.22, 0.22, 1.1), gunMat, 0, 0, 0.35);
-    part(gun, box(0.3, 0.3, 0.3), accentMat, 0, 0, 0.0);
-    part(gun, box(0.1, 0.1, 0.5), darkMat, 0, -0.16, 0.3);
+    add('gun', 0.22, 0.22, 1.1, 0.3, 1.24, 0.69, GUNMETAL);
+    add('gun', 0.3, 0.3, 0.3, 0.3, 1.24, 0.34, accent);
+    add('gun', 0.1, 0.1, 0.5, 0.3, 1.08, 0.64, DARK);
   } else if (classId === 'stealth') {
-    part(gun, box(0.18, 0.18, 0.8), gunMat, 0, 0, 0.3);
-    part(gun, box(0.12, 0.2, 0.2), darkMat, 0, -0.12, 0.05);
+    add('gun', 0.18, 0.18, 0.8, 0.3, 1.24, 0.64, GUNMETAL);
+    add('gun', 0.12, 0.2, 0.2, 0.3, 1.12, 0.39, DARK);
   } else if (classId === 'medic') {
-    part(gun, box(0.12, 0.2, 0.62), gunMat, 0, 0, 0.26);
-    part(gun, box(0.1, 0.1, 0.16), accentMat, 0, 0.1, 0.3);
+    add('gun', 0.12, 0.2, 0.62, 0.3, 1.24, 0.6, GUNMETAL);
+    add('gun', 0.1, 0.1, 0.16, 0.3, 1.34, 0.64, accent);
   } else {
-    part(gun, box(0.13, 0.18, 0.95), gunMat, 0, 0, 0.32);
-    part(gun, box(0.1, 0.22, 0.2), gunMat, 0, -0.16, 0.1);
-    part(gun, box(0.08, 0.08, 0.22), darkMat, 0, 0.11, 0.26);
+    add('gun', 0.13, 0.18, 0.95, 0.3, 1.24, 0.66, GUNMETAL);
+    add('gun', 0.1, 0.22, 0.2, 0.3, 1.08, 0.44, GUNMETAL);
+    add('gun', 0.08, 0.08, 0.22, 0.3, 1.35, 0.6, DARK);
   }
+
+  const material = new THREE.MeshStandardMaterial({
+    vertexColors: true,
+    roughness: 0.82,
+    metalness: 0.08,
+    envMapIntensity: 0.3,
+  });
+
+  const parts = {};
+  for (const [name, geometries] of Object.entries(buckets)) {
+    if (!geometries.length) continue;
+    const merged = geometries.length === 1 ? geometries[0] : mergeGeometries(geometries, false);
+    if (geometries.length > 1) geometries.forEach((g) => g.dispose());
+    const mesh = new THREE.Mesh(merged, material);
+    const [px, py, pz] = PIVOTS[name];
+    mesh.position.set(px, py, pz);
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    (name === 'body' ? root : body).add(mesh);
+    parts[name] = mesh;
+  }
+  parts.body = body;
+  body.add(parts.legL, parts.legR, parts.armL, parts.armR, parts.head, parts.gun);
 
   const muzzle = new THREE.Object3D();
   muzzle.position.set(0, 0, 0.95);
-  gun.add(muzzle);
+  parts.gun.add(muzzle);
+  parts.muzzle = muzzle;
+  parts.torso = parts.body;
 
-  root.userData.parts = { body, legL, legR, torso, head, armL, armR, gun, muzzle };
-  root.userData.materials = [teamMat, gearMat, skinMat, accentMat, gunMat, darkMat, glassMat];
+  root.userData.parts = parts;
+  root.userData.materials = [material];
   return root;
 }
 

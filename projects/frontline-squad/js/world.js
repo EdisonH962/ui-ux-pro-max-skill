@@ -4,7 +4,41 @@
 
 import * as THREE from 'three';
 import { TEAMS } from './config.js';
-import { applyBoxUVs } from './materials.js';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { projectPlanarUVs, bakeVertexAO, neutralVertexColors } from './materials.js';
+
+const GROUND_NORMAL = new THREE.Vector3(0, 1, 0);
+const _dir = new THREE.Vector3();
+const AXES = ['x', 'y', 'z'];
+const AXIS_NORMALS = {
+  x: [new THREE.Vector3(-1, 0, 0), new THREE.Vector3(1, 0, 0)],
+  y: [new THREE.Vector3(0, -1, 0), new THREE.Vector3(0, 1, 0)],
+  z: [new THREE.Vector3(0, 0, -1), new THREE.Vector3(0, 0, 1)],
+};
+
+/** Slab-method ray/box test returning entry distance and the face normal hit. */
+function rayAABB(origin, dir, min, max, maxT) {
+  let tmin = 0, tmax = maxT;
+  let axis = null, side = 0;
+  for (const a of AXES) {
+    const d = dir[a];
+    if (Math.abs(d) < 1e-9) {
+      if (origin[a] < min[a] || origin[a] > max[a]) return null;
+      continue;
+    }
+    const inv = 1 / d;
+    let t1 = (min[a] - origin[a]) * inv;
+    let t2 = (max[a] - origin[a]) * inv;
+    let near = 0;
+    if (t1 > t2) { const tmp = t1; t1 = t2; t2 = tmp; near = 1; }
+    if (t1 > tmin) { tmin = t1; axis = a; side = near; }
+    if (t2 < tmax) tmax = t2;
+    if (tmin > tmax) return null;
+  }
+  if (!axis || tmin <= 0 || tmin >= maxT) return null;
+  return { t: tmin, normal: AXIS_NORMALS[axis][side] };
+}
 
 const PALETTE = {
   sand: 'sand',
@@ -49,14 +83,13 @@ export class World {
   constructor(scene, materials) {
     this.scene = scene;
     this.mats = materials;
-    this.colliders = [];          // Box3 list for movement
-    this.collisionMeshes = [];    // meshes for ray casts
+    this.colliders = [];          // Box3 list for movement and ray casts
+    this.mergeable = [];          // static meshes that get batched per material
     this.spawns = { alpha: [], bravo: [] };
     this.points = [];             // domination capture points
     this.waypoints = [];
     this.graph = [];
     this.bounds = { min: -58, max: 58 };
-    this.raycaster = new THREE.Raycaster();
     this.group = new THREE.Group();
     scene.add(this.group);
   }
@@ -88,12 +121,12 @@ export class World {
     for (let i = 0; i < groundUv.count; i++) {
       groundUv.setXY(i, groundUv.getX(i) * 65, groundUv.getY(i) * 65);
     }
+    neutralVertexColors(groundGeo);
     const ground = new THREE.Mesh(groundGeo, this.mats.get('sand'));
     ground.rotation.x = -Math.PI / 2;
     ground.receiveShadow = true;
     this.group.add(ground);
     this.groundMesh = ground;
-    this.collisionMeshes.push(ground);
 
     this.buildPerimeter();
     this.buildBases();
@@ -107,6 +140,7 @@ export class World {
     // otherwise every collider would be treated as sitting at the origin.
     this.group.updateMatrixWorld(true);
     this.buildWaypoints();
+    this.batchStatics();
     return this;
   }
 
@@ -126,19 +160,29 @@ export class World {
       mat.transparent = true;
       mat.opacity = opts.opacity;
     }
-    const geo = new THREE.BoxGeometry(w, h, d);
-    if (typeof surface === 'string') applyBoxUVs(geo, w, h, d, tile);
+    // Bevelled edges instead of hard 90° corners: the chamfer catches a highlight,
+    // which is most of the difference between "building" and "toy brick".
+    const bevel = Math.min(0.06, w / 2.5, h / 2.5, d / 2.5);
+    const geo = opts.sharp
+      ? new THREE.BoxGeometry(w, h, d)
+      : new RoundedBoxGeometry(w, h, d, 1, bevel);
+    if (typeof surface === 'string') {
+      projectPlanarUVs(geo, tile);
+      bakeVertexAO(geo, { height: Math.min(1.6, h) });
+    }
     const mesh = new THREE.Mesh(geo, mat);
     mesh.position.set(x, y + h / 2, z);
     mesh.castShadow = opts.cast !== false;
     mesh.receiveShadow = true;
     this.group.add(mesh);
+    if (opts.static !== false && opts.opacity == null) {
+      this.mergeable.push(mesh);          // flat-coloured trim batches just as well
+    }
     if (opts.solid !== false) {
       this.colliders.push(new THREE.Box3(
         new THREE.Vector3(x - w / 2, y, z - d / 2),
         new THREE.Vector3(x + w / 2, y + h, z + d / 2)
       ));
-      this.collisionMeshes.push(mesh);
     }
     return mesh;
   }
@@ -151,20 +195,22 @@ export class World {
 
   cylinder(x, y, z, r, h, surface, opts = {}) {
     const mat = typeof surface === 'string' ? this.mats.get(surface) : this.mats.color(surface, opts);
-    const mesh = new THREE.Mesh(
-      new THREE.CylinderGeometry(r, r, h, opts.segments || 16),
-      mat
-    );
+    const cylGeo = new THREE.CylinderGeometry(r, r, h, opts.segments || 16);
+    if (typeof surface === 'string') {
+      projectPlanarUVs(cylGeo, this.mats.tileOf(surface));
+      bakeVertexAO(cylGeo, { height: Math.min(1.6, h) });
+    }
+    const mesh = new THREE.Mesh(cylGeo, mat);
     mesh.position.set(x, y + h / 2, z);
     mesh.castShadow = true;
     mesh.receiveShadow = true;
     this.group.add(mesh);
+    if (typeof surface === 'string') this.mergeable.push(mesh);
     if (opts.solid !== false) {
       this.colliders.push(new THREE.Box3(
         new THREE.Vector3(x - r, y, z - r),
         new THREE.Vector3(x + r, y + h, z + r)
       ));
-      this.collisionMeshes.push(mesh);
     }
     return mesh;
   }
@@ -310,6 +356,7 @@ export class World {
       canopy.scale.y = 0.55;
       canopy.castShadow = true;
       this.group.add(canopy);
+      this.mergeable.push(canopy);
     });
   }
 
@@ -361,7 +408,9 @@ export class World {
     deco(0, 4.6, 0, 17, 0.6, 17, PALETTE.wood);
     // framed niches on each face of the tower base, so the walls are not blank
     for (const [nx, nz, nw, nd] of [[0, 8.1, 2.4, 0.3], [0, -8.1, 2.4, 0.3], [8.1, 0, 0.3, 2.4], [-8.1, 0, 0.3, 2.4]]) {
-      deco(nx, 1.5, nz, nw, 2.4, nd, 0x3a2f24);                                  // recess
+      // the recess is solid: a bullet that flew through a panel this large and this
+      // flat would visibly pass through the wall in front of the player
+      this.box(nx, 1.5, nz, nw, 2.4, nd, 0x3a2f24);                              // recess
       deco(nx, 1.5, nz, nw + 0.5, 0.3, nd + 0.1, PALETTE.wood);                  // sill
       deco(nx, 3.9, nz, nw + 0.5, 0.35, nd + 0.1, PALETTE.wood);                 // lintel
       if (nw > nd) {
@@ -378,16 +427,19 @@ export class World {
     for (let i = 0; i < 26; i++) {
       const a = Math.random() * Math.PI * 2;
       const r = 12 + Math.random() * 40;
-      const drift = new THREE.Mesh(
-        new THREE.CircleGeometry(3 + Math.random() * 7, 12),
-        this.mats.color(0xc9a367, { roughness: 1 })
-      );
-      drift.material.transparent = true;
-      drift.material.opacity = 0.35;
+      // own material instance: mutating the cached one would tint every other
+      // surface that happens to share this colour
+      if (!this.driftMaterial) {
+        this.driftMaterial = this.mats.color(0xc9a367, { roughness: 1 }).clone();
+        this.driftMaterial.transparent = true;
+        this.driftMaterial.opacity = 0.35;
+      }
+      const drift = new THREE.Mesh(new THREE.CircleGeometry(3 + Math.random() * 7, 12), this.driftMaterial);
       drift.rotation.x = -Math.PI / 2;
       drift.position.set(Math.cos(a) * r, 0.02, Math.sin(a) * r);
       drift.receiveShadow = true;
       this.group.add(drift);
+      this.mergeable.push(drift);
     }
 
     // distant dunes outside the arena so the horizon is not empty sky
@@ -401,6 +453,7 @@ export class World {
       hill.position.set(Math.cos(a) * r, -6 - Math.random() * 6, Math.sin(a) * r);
       hill.scale.y = 0.45;
       this.group.add(hill);
+      this.mergeable.push(hill);
     }
   }
 
@@ -508,14 +561,60 @@ export class World {
     }
   }
 
+  /**
+   * Batches every static piece into one mesh per material. Phone GPUs are limited by
+   * draw calls long before they run out of triangles, and the map is built from
+   * hundreds of small boxes that never move — exactly the case batching is for.
+   */
+  batchStatics() {
+    const byMaterial = new Map();
+    for (const mesh of this.mergeable) {
+      if (!byMaterial.has(mesh.material)) byMaterial.set(mesh.material, []);
+      byMaterial.get(mesh.material).push(mesh);
+    }
+
+    let merged = 0, removed = 0;
+    for (const [material, meshes] of byMaterial) {
+      if (meshes.length < 2) continue;
+      const geometries = meshes.map((m) => {
+        // rounded boxes arrive non-indexed, cylinders indexed — merging needs one or
+        // the other throughout, so everything is normalised to non-indexed here
+        const geo = m.geometry.index ? m.geometry.toNonIndexed() : m.geometry.clone();
+        m.updateMatrixWorld(true);
+        geo.applyMatrix4(m.matrixWorld);
+        return geo;
+      });
+      const batch = mergeGeometries(geometries, false);
+      geometries.forEach((g) => g.dispose());
+      if (!batch) continue;
+
+      const mesh = new THREE.Mesh(batch, material);
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+      mesh.matrixAutoUpdate = false;
+      this.group.add(mesh);
+      merged++;
+
+      for (const m of meshes) {
+        this.group.remove(m);
+        m.geometry.dispose();
+        removed++;
+      }
+    }
+    this.batchStats = { batches: merged, replaced: removed };
+    this.mergeable.length = 0;
+  }
+
   // ---------------------------------------------------------------- queries
 
-  /** Height of the first surface below `fromY`, or null if there is none. */
+  /** Height of the highest surface below `fromY` at (x, z), or null if there is none. */
   floorAt(x, z, fromY) {
-    this.raycaster.set(new THREE.Vector3(x, fromY, z), new THREE.Vector3(0, -1, 0));
-    this.raycaster.far = fromY + 1;
-    const hits = this.raycaster.intersectObjects(this.collisionMeshes, false);
-    return hits.length ? hits[0].point.y : null;
+    let best = fromY >= 0 ? 0 : null;          // the ground plane
+    for (const c of this.colliders) {
+      if (x < c.min.x || x > c.max.x || z < c.min.z || z > c.max.z) continue;
+      if (c.max.y <= fromY && (best == null || c.max.y > best)) best = c.max.y;
+    }
+    return best;
   }
 
   /**
@@ -555,22 +654,35 @@ export class World {
     return y == null ? 0 : y;
   }
 
-  /** Raycast against static geometry. Returns {point, distance, normal} or null. */
+  /**
+   * Raycast against static geometry. Tests the collider boxes analytically instead of
+   * walking mesh triangles: exact for box geometry, far cheaper per ray, and it stays
+   * correct now that the visual meshes are batched. Returns {point, distance, normal}.
+   */
   raycast(origin, dir, maxDist = 250) {
-    this.raycaster.set(origin, dir);
-    this.raycaster.far = maxDist;
-    const hits = this.raycaster.intersectObjects(this.collisionMeshes, false);
-    if (!hits.length) return null;
-    const h = hits[0];
+    let bestT = maxDist;
+    let bestNormal = null;
+
+    for (const c of this.colliders) {
+      const hit = rayAABB(origin, dir, c.min, c.max, bestT);
+      if (hit) { bestT = hit.t; bestNormal = hit.normal; }
+    }
+
+    if (dir.y < -1e-6) {                       // ground plane at y = 0
+      const t = -origin.y / dir.y;
+      if (t > 0 && t < bestT) { bestT = t; bestNormal = GROUND_NORMAL; }
+    }
+
+    if (!bestNormal) return null;
     return {
-      point: h.point.clone(),
-      distance: h.distance,
-      normal: h.face ? h.face.normal.clone() : new THREE.Vector3(0, 1, 0),
+      point: origin.clone().addScaledVector(dir, bestT),
+      distance: bestT,
+      normal: bestNormal.clone(),
     };
   }
 
   lineOfSight(a, b) {
-    const dir = new THREE.Vector3().subVectors(b, a);
+    const dir = _dir.subVectors(b, a);
     const dist = dir.length();
     if (dist < 0.001) return true;
     dir.divideScalar(dist);

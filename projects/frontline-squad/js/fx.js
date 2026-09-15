@@ -16,6 +16,35 @@ function flashTexture() {
   return new THREE.CanvasTexture(c);
 }
 
+function bulletHoleTexture() {
+  const c = document.createElement('canvas');
+  c.width = c.height = 64;
+  const g = c.getContext('2d');
+  g.clearRect(0, 0, 64, 64);
+  const grad = g.createRadialGradient(32, 32, 2, 32, 32, 30);
+  grad.addColorStop(0, 'rgba(20,16,12,0.95)');
+  grad.addColorStop(0.35, 'rgba(45,38,30,0.75)');
+  grad.addColorStop(0.7, 'rgba(120,105,85,0.35)');
+  grad.addColorStop(1, 'rgba(160,145,120,0)');
+  g.fillStyle = grad;
+  g.beginPath();
+  g.arc(32, 32, 30, 0, Math.PI * 2);
+  g.fill();
+  for (let i = 0; i < 9; i++) {          // radial cracks
+    const a = Math.random() * Math.PI * 2;
+    const len = 8 + Math.random() * 18;
+    g.strokeStyle = 'rgba(30,24,18,0.5)';
+    g.lineWidth = 1 + Math.random();
+    g.beginPath();
+    g.moveTo(32, 32);
+    g.lineTo(32 + Math.cos(a) * len, 32 + Math.sin(a) * len);
+    g.stroke();
+  }
+  return new THREE.CanvasTexture(c);
+}
+
+const DECAL_LIMIT = 40;
+
 export class FX {
   constructor(scene) {
     this.scene = scene;
@@ -25,6 +54,51 @@ export class FX {
     this.tracerPool = [];
     this.spritePool = [];
     this.boxPool = [];
+
+    // All bullet holes live in one instanced mesh: any number of impact marks
+    // costs exactly one draw call, which is what makes them affordable on phones.
+    this.decals = new THREE.InstancedMesh(
+      new THREE.PlaneGeometry(1, 1),
+      new THREE.MeshBasicMaterial({
+        map: bulletHoleTexture(),
+        transparent: true,
+        depthWrite: false,
+        polygonOffset: true,
+        polygonOffsetFactor: -4,
+      }),
+      DECAL_LIMIT
+    );
+    this.decals.frustumCulled = false;
+    this.decals.count = DECAL_LIMIT;
+    this.decalIndex = 0;
+    this._decalMatrix = new THREE.Matrix4();
+    this._decalObject = new THREE.Object3D();
+    const hidden = new THREE.Matrix4().makeScale(0, 0, 0);
+    for (let i = 0; i < DECAL_LIMIT; i++) this.decals.setMatrixAt(i, hidden);
+    this.decals.instanceMatrix.needsUpdate = true;
+    scene.add(this.decals);
+  }
+
+  /** Stamps a bullet hole onto a surface, recycling the oldest slot. */
+  decal(point, normal, size = 0.3) {
+    if (!normal) return;
+    const o = this._decalObject;
+    o.position.copy(point).addScaledVector(normal, 0.02);
+    o.lookAt(point.clone().addScaledVector(normal, 1));
+    o.rotateZ(Math.random() * Math.PI * 2);
+    const s = size * (0.75 + Math.random() * 0.6);
+    o.scale.set(s, s, s);
+    o.updateMatrix();
+    this.decals.setMatrixAt(this.decalIndex, o.matrix);
+    this.decals.instanceMatrix.needsUpdate = true;
+    this.decalIndex = (this.decalIndex + 1) % DECAL_LIMIT;
+  }
+
+  clearDecals() {
+    const hidden = this._decalMatrix.makeScale(0, 0, 0);
+    for (let i = 0; i < DECAL_LIMIT; i++) this.decals.setMatrixAt(i, hidden);
+    this.decals.instanceMatrix.needsUpdate = true;
+    this.decalIndex = 0;
   }
 
   // ------------------------------------------------------------ pool utils
@@ -94,6 +168,7 @@ export class FX {
   }
 
   impact(point, normal) {
+    this.decal(point, normal);
     for (let i = 0; i < 4; i++) {
       const m = this.takeBox(0xd9c39a);
       m.position.copy(point);
