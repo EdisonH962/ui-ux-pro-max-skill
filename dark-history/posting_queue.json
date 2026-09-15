@@ -93,11 +93,13 @@
     },
     {
       "script": "25 - The Lost Colony of Roanoke (1587)",
-      "status": "pending",
+      "status": "posted",
       "video_url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3G8m1bxNBqhjlyBCY2gFUlzpzbo/6e891a91-4589-4c15-8a60-f2c92fbc144e.mp4",
       "title": "Roanoke 1587 — He came back with supplies. All hundred and fifteen people were gone. #darkhistory #roanoke #mystery",
       "music_sound_id": "6739957724429158401",
-      "duration_sec": 74.38
+      "duration_sec": 74.38,
+      "publish_id": "v_pub_url~v2.7685546093584664609",
+      "posted_at": "2026-09-15T00:09:00Z"
     },
     {
       "script": "26 - Pompeii: The Warning Nobody Read (79 AD)",
