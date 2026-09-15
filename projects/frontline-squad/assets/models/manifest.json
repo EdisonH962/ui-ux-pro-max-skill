@@ -1,0 +1,4 @@
+{
+  "characters": {},
+  "note": "Add a class id here to replace its procedural fighter with a real model. See README.md in this folder for the format; manifest.test.json is a working example used by the automated test."
+}

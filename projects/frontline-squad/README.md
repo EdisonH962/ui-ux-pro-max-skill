@@ -75,6 +75,26 @@ js/audio.js         Alle Sounds synthetisch über WebAudio erzeugt
 js/main.js          Renderer, Menü, Matchaufbau, Spielschleife
 ```
 
+### Charaktermodelle
+
+Das Spiel lädt echte, gerigte Charaktere aus `assets/models/`, sobald welche da sind, und
+fällt sonst auf die prozeduralen Figuren zurück — klassenweise, gemischt möglich.
+
+`js/characters.js` ist auf die Ausgabe üblicher Generatoren zugeschnitten: Basis-Modell
+plus **eine GLB-Datei pro Animation**. Der Loader zieht aus jeder Datei den ersten Clip,
+hängt ihn unter einem Zustandsnamen an dasselbe Skelett und stellt daraus eine kleine
+Zustandsmaschine bereit: `idle`, `run`, `aim` laufen dauerhaft, `fire`, `reload` und
+`death` sind Einmal-Clips mit Vorrang. Fehlende Zustände fallen auf `idle` zurück, ein
+unvollständiger Satz funktioniert also auch.
+
+Instanzen werden mit `SkeletonUtils.clone()` erzeugt, jede Figur hat ihr eigenes Skelett
+und eigene Materialien (nötig für Tarnung und Teamfärbung). Waffen hängen an einem im
+Manifest benannten Knochen.
+
+Format und Budget stehen in `assets/models/README.md`. Unter `assets/models/_fixture/`
+liegt ein winziges geriggtes Testmodell, mit dem der gesamte Pfad automatisiert geprüft
+wird — Laden, Klonen, Clip-Zusammenführung aus mehreren Dateien, Zustandswechsel.
+
 ### Mobiles Budget
 
 Zielgerät ist das Handy, und dort limitieren **Draw Calls**, nicht Dreiecke. Gemessen im
@@ -93,8 +113,11 @@ Drei Maßnahmen bringen das:
    zusammen — aus 406 Einzelmeshes werden 12 Batches.
 2. **Kämpfer** bestehen aus einem einzigen Material mit Vertex-Farben; nur die animierten
    Gruppen (Beine, Arme, Kopf, Waffe) bleiben getrennt. 24 Meshes pro Figur wurden 7.
-3. **Einschusslöcher** liegen in einer `InstancedMesh` — beliebig viele Treffer kosten
-   genau einen Draw Call.
+3. **Einschusslöcher und Trümmerpartikel** liegen je in einer `InstancedMesh`. Drei
+   gleichzeitige Explosionen plus Einschläge ergeben 132 fliegende Teile und kosten
+   zusammen einen Draw Call statt 132 — gemessen 96 Calls im Worst Case.
+4. **Namensschilder** werden nach Entfernung ausgeblendet (Verbündete 55 m, Gegner 28 m):
+   drei Meshes pro Figur, die sonst dauerhaft mitlaufen.
 
 Weil die Sichtprüfung nicht mehr gegen Mesh-Dreiecke laufen kann, sobald Geometrie
 verschmolzen ist, testet `World.raycast()` die Kollisionsboxen analytisch (Slab-Methode).

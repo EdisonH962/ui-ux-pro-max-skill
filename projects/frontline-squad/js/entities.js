@@ -270,7 +270,11 @@ export class Fighter {
     this.streak = 0;
     this.recentDamagers = new Map();
 
-    this.mesh = makeFighterMesh(TEAMS[team].color, cls.id);
+    // a real character model when the project ships one, procedural boxes otherwise
+    this.avatar = game.characters && game.characters.has(cls.id)
+      ? game.characters.create(cls.id, TEAMS[team].color)
+      : null;
+    this.mesh = this.avatar ? this.avatar.root : makeFighterMesh(TEAMS[team].color, cls.id);
     this.mesh.visible = !isPlayer;
     game.scene.add(this.mesh);
 
@@ -381,7 +385,11 @@ export class Fighter {
     this.deaths++;
     this.streak = 0;
     this.respawnAt = this.game.time + RULES.respawnDelay;
-    this.mesh.visible = false;
+    if (this.avatar) {
+      this.avatar.trigger('death', this.game.time, RULES.respawnDelay);   // body stays until respawn
+    } else {
+      this.mesh.visible = false;
+    }
     this.cloaked = false;
     this.bulwark = false;
     this.game.arena.onKill(killer, this);
@@ -505,6 +513,7 @@ export class Fighter {
     if (this.reloading || this.ammo === this.weapon.mag) return;
     this.reloading = true;
     this.reloadEnd = this.game.time + this.weapon.reload;
+    if (this.avatar) this.avatar.trigger('reload', this.game.time, this.weapon.reload);
     this.spin = 0;
     if (this.isPlayer) this.game.audio.reload();
   }
@@ -558,6 +567,7 @@ export class Fighter {
       this.game.fx.tracer(this.muzzleWorldPos(), res.point || origin.clone().add(dir.multiplyScalar(w.range)), this.team);
     }
 
+    if (this.avatar) this.avatar.trigger('fire', this.game.time, 0.25);
     this.game.audio.shot(w.sound, this.isPlayer ? null : this.distanceToPlayer());
     this.game.fx.muzzleFlash(this.muzzleWorldPos(), this.team);
     this.onFired(hitSomething, killed);
@@ -569,6 +579,12 @@ export class Fighter {
   onFired() { /* overridden by Player for recoil / hitmarker */ }
 
   muzzleWorldPos() {
+    if (this.avatar) {
+      const mount = this.avatar.weaponMount;
+      if (mount && !this.isPlayer) return mount.getWorldPosition(new THREE.Vector3());
+      const dir = this.aimDirection(0);
+      return this.eye.clone().addScaledVector(dir, 0.8).add(new THREE.Vector3(0, -0.1, 0));
+    }
     const parts = this.mesh.userData.parts;
     if (this.isPlayer) {
       const dir = this.aimDirection(0);
@@ -645,14 +661,17 @@ export class Fighter {
 
   setOpacity(o) {
     const visible = o >= 0.99;
+    if (this.avatar) {
+      this.avatar.setOpacity(o);
+      this._plateVisible = undefined;      // let the nameplate rule re-evaluate
+      return;
+    }
     for (const m of this.mesh.userData.materials) {
       m.transparent = !visible;
       m.opacity = o;
       m.needsUpdate = true;
     }
-    this.label.visible = visible;
-    this.hpBar.visible = visible;
-    this.hpBarBg.visible = visible;
+    this._plateVisible = undefined;
   }
 
   regenerate(dt) {
@@ -667,8 +686,19 @@ export class Fighter {
     this.mesh.position.set(this.pos.x, this.pos.y, this.pos.z);
     this.mesh.rotation.y = this.yaw;
 
-    const parts = this.mesh.userData.parts;
     const speed = new THREE.Vector3(this.vel.x, 0, this.vel.z).length();
+
+    if (this.avatar) {
+      this.avatar.update(dt);
+      if (this.alive) {
+        const aiming = this.isPlayer ? this.scoped : !!this.target;
+        this.avatar.drive(speed > 0.6 ? 'run' : aiming ? 'aim' : 'idle', this.game.time);
+      }
+      this.updateNameplate(speed, dt);
+      return;
+    }
+
+    const parts = this.mesh.userData.parts;
     this.stepPhase += speed * dt * 2.2;
     const swing = Math.sin(this.stepPhase) * Math.min(0.6, speed * 0.09);
     parts.legL.rotation.x = swing;
@@ -688,11 +718,31 @@ export class Fighter {
       this.lastStepSign = Math.sign(phase);
     }
 
+    this.updateNameplate(speed, dt);
+  }
+
+  updateNameplate(speed, dt) {
+    const cam = this.game.camera;
+    const player = this.game.player;
+
+    // Nameplates are three meshes per fighter — that is real draw-call money on a
+    // phone, and a wall of distant labels reads as clutter. Show them only where
+    // they inform: allies at mid range, enemies only when close or marked.
+    const dist = cam ? cam.position.distanceTo(this.pos) : 0;
+    const ally = player && player.team === this.team;
+    const show = this.alive && !this.cloaked && (ally ? dist < 55 : (dist < 28 || this.marked > this.game.time));
+    if (show !== this._plateVisible) {
+      this._plateVisible = show;
+      this.label.visible = show;
+      this.hpBar.visible = show;
+      this.hpBarBg.visible = show;
+    }
+    if (!show) return;
+
     const ratio = Math.max(0, this.hp / this.maxHp);
     this.hpBar.scale.x = Math.max(0.001, ratio);
     this.hpBar.position.x = -(1 - ratio) * 0.72;
 
-    const cam = this.game.camera;
     if (cam) {
       this.hpBar.lookAt(cam.position);
       this.hpBarBg.lookAt(cam.position);
@@ -702,8 +752,9 @@ export class Fighter {
     const isMarked = this.marked > this.game.time;
     if (isMarked !== this._markedVisual) {
       this._markedVisual = isMarked;
-      for (const m of this.mesh.userData.materials) {
-        m.emissive = new THREE.Color(isMarked ? 0x552200 : 0x000000);
+      const materials = this.avatar ? this.avatar.materials : this.mesh.userData.materials;
+      for (const m of materials) {
+        if (m.emissive) m.emissive = new THREE.Color(isMarked ? 0x552200 : 0x000000);
       }
     }
   }

@@ -1,0 +1,15 @@
+{
+  "characters": {
+    "soldier": {
+      "model": "models/_fixture/dummy.glb",
+      "scale": 1.0,
+      "teamMaterial": "Armor",
+      "weaponBone": "RightHand",
+      "clips": {
+        "idle": { "name": "idle" },
+        "run": { "file": "models/_fixture/dummy_run.glb" },
+        "fire": { "file": "models/_fixture/dummy_run.glb", "loop": "once", "speed": 2.5 }
+      }
+    }
+  }
+}

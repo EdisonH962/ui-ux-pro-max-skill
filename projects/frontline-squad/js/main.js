@@ -9,6 +9,7 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { CLASSES, CLASS_LIST, MODES, DIFFICULTY, TEAMS, BOT_NAMES, RULES } from './config.js';
 import { MaterialLibrary } from './materials.js';
+import { CharacterLibrary } from './characters.js';
 import { World } from './world.js';
 import { Arena } from './arena.js';
 import { FX } from './fx.js';
@@ -80,6 +81,13 @@ class Game {
     pmrem.dispose();
 
     this.materials = new MaterialLibrary(this.renderer);
+    this.characters = new CharacterLibrary();
+    // character models are optional; the match simply starts with procedural fighters
+    // if none are shipped, and waits for the load if they are
+    this.charactersReady = this.characters.load().then((ok) => {
+      if (this.characters.errors.length) console.warn('character assets:', this.characters.errors);
+      return ok;
+    });
     this.world = new World(this.scene, this.materials).build();
     // phones start on the low tier; desktops on medium, switchable in the menu
     const coarse = matchMedia('(pointer: coarse)').matches;
@@ -287,7 +295,8 @@ class Game {
     this.player = null;
   }
 
-  startMatch() {
+  async startMatch() {
+    await this.charactersReady;
     if (this.selected.quality && this.selected.quality !== this.quality) {
       this.applyQuality(this.selected.quality);
     }
