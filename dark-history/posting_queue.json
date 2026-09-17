@@ -113,11 +113,13 @@
     },
     {
       "script": "27 - H. H. Holmes: The Castle That Wasn't (1893)",
-      "status": "pending",
+      "status": "posted",
       "video_url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3G8m1bxNBqhjlyBCY2gFUlzpzbo/3f9165b2-bef4-4e51-b711-4814df49a07f.mp4",
       "title": "H. H. Holmes 1893 — He confessed to twenty-seven murders. Several victims turned up alive. #darkhistory #hhholmes #truecrime",
       "music_sound_id": "6859381931478353922",
-      "duration_sec": 83.6
+      "duration_sec": 83.6,
+      "publish_id": "v_pub_url~v2.7686288826054084640",
+      "posted_at": "2026-09-17T00:09:00Z"
     },
     {
       "script": "28 - The Bell Witch (1817)",
