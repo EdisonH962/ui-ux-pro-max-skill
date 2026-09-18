@@ -521,9 +521,17 @@ durch.
 durch die Bildanzahl zu teilen und das Ergebnis fuer den Bildpreis zu halten — dabei
 kommen ~2,5-3,0 pro Bild heraus, was niemandem entspricht. Das Voiceover steckt mit drin.
 
-**Modellwahl:** `nano_banana_pro` liefert die besten Bilder und kostet nur 0,5 Credits
-mehr pro Bild als `nano_banana_2`, also 4 Credits pro Video — bei 24 Credits Gesamtkosten
-ist das der falsche Ort zum Sparen. Pro ist die Empfehlung.
+**Modellwahl: `nano_banana_2_lite` (1,0 Credit/Bild) ist die aktuelle Wahl.** Am 18.09.2026
+mit einem Testbild gegen den Kanal-Look geprueft und visuell bestaetigt — fotorealistisch
+und entsaettigt, nicht von nano_banana_2 zu unterscheiden. Parameter: `resolution: "1k"`,
+`thinking: "HIGH"`. Damit kostet ein Video **8 x 1,0 + 8,0 = 16 Credits** statt 20 (Nano
+Banana 2) oder 24 (Pro). Bei 8 Bildern spart das 8 bzw. 16 Credits pro Video ohne
+sichtbaren Qualitaetsverlust.
+
+Vor einem Modellwechsel IMMER ein Testbild mit einem echten Szenen-Prompt erzeugen, es
+per base64 in den Chat holen (Stueckelung siehe unten) und WIRKLICH ANSEHEN. Ein Modell
+nach Katalogbeschreibung auszuwaehlen reicht nicht: `z_image` klingt mit 0,15 Credits
+verlockend, ist aber als "stylized" gelabelt und wurde nie geprueft.
 
 **Wichtig zur Modellkontrolle:** Das `model`-Feld im Ergebnis von `jobs_wait` ist
 UNZUVERLAESSIG. Bei einer Anforderung von `nano_banana_pro` meldet es `nano_banana_2`,

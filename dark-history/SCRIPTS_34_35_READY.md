@@ -2,8 +2,21 @@
 
 Stand 18.09.2026. Beide Skripte sind geschrieben, die Anker sind deterministisch gegen
 den Skripttext simuliert (kuerzeste Szene 8,8 s bzw. 8,8 s — keine verdaechtig kurze Szene),
-die Bildlisten stehen. Es fehlt nur das Higgsfield-Guthaben: pro Skript 8 Bilder à ~2,95
-Credits plus ~0,3 fuer das Voiceover, also **rund 24 Credits je Skript**.
+die Bildlisten stehen. Es fehlt nur das Higgsfield-Guthaben.
+
+## Bildmodell: `nano_banana_2_lite`
+
+Vom Nutzer gewaehlt, **1,0 Credit pro Bild** — das guenstigste Modell, das den Kanal-Look
+trifft. Am 18.09. mit einem Testbild (Szene 1 von Skript 34) geprueft und visuell bestaetigt:
+fotorealistisch, entsaettigt, nasses Kopfsteinpflaster im Gaslicht, Nebel, keine Personen —
+nicht von nano_banana_2 zu unterscheiden. Parameter: `resolution: "1k"`, `thinking: "HIGH"`,
+`aspect_ratio: "9:16"`.
+
+**Kosten pro Skript: 8 x 1,0 + 8,0 (Voiceover) = 16 Credits.** Beide zusammen 32.
+
+**Szene 1 von Skript 34 ist bereits generiert und bezahlt** — nicht neu erzeugen:
+`https://d8j0ntlcm91z4.cloudfront.net/user_3G8m1bxNBqhjlyBCY2gFUlzpzbo/hf_20260918_221412_e6570db5-ed21-436a-9276-bb33c1476841.png`
+Damit kostet Skript 34 nur noch 15 Credits, Skript 35 volle 16 — zusammen **31**.
 
 Ablauf nach dem Aufladen: Abschnitt 7 der Datei DARK_HISTORY_PIPELINE_BACKUP.md,
 zusaetzlich Regel 3e beachten (Transkript vor dem Render lesen).
