@@ -335,6 +335,14 @@ higgsedit render . --engine node --out renders/final.mp4   # Node-Engine = ~4x s
 `--engine node` teilt den Render automatisch in Shards auf (bei ~85s Video: 3
 Worker-Prozesse, je ~14–30s CPU-Zeit, insgesamt 1–3 Minuten).
 
+**BUG Nr. 5 (aufgetreten bei Skript 31, 18.09.2026):** `higgsedit render . --engine node`
+bricht ab mit `Error: --engine was removed: higgsedit is native-only`. Die Node/Chrome-
+Engine-Unterscheidung existiert nicht mehr, higgsedit rendert immer nativ. **Deshalb:
+`higgsedit render . --out renders/final.mp4` OHNE `--engine`-Flag aufrufen.** Der native
+Renderer sharded weiterhin automatisch (bei 84s Video: 7 Shards x 2 Threads, ~115 ms/Frame,
+knapp 2 Minuten gesamt) und meldet am Ende ein JSON mit `"ok": true` und `fallbacks: []` —
+ein nichtleeres `fallbacks` waere das Warnsignal.
+
 **BUG Nr. 4 (Upload nach media_upload):** Der `curl -X PUT`-Upload zur presigned
 S3-URL schlägt mit `403 SignatureDoesNotMatch` fehl, wenn der `Content-Type`-Header
 fehlt — die Signatur ist über `content-type;host` gebildet (siehe
@@ -467,6 +475,29 @@ tiktok_publish_status(connector_id, publish_id)   # Status "PROCESSING_DOWNLOAD"
 `music_sound_volume: 15` entspricht der Vorgabe "max. 15% Lautstärke unter der Stimme"
 aus der Original-Checkliste; `video_original_sound_volume: 100` lässt die Stimme voll
 durch.
+
+---
+
+### 3.5 Bildkosten und Modellwahl (Stand 18.09.2026)
+
+`nano_banana_2` kostet **~2,45 Credits pro Bild**, also ~19,6 Credits fuer ein Video mit 8
+Szenen (plus ~0,3 fuer das Voiceover). Bei einem Lite-Plan-Guthaben von ~75 Credits reicht
+das fuer knapp vier Videos. Vor dem Start einer Serie: `balance` abfragen und
+`anzahl_videos * 20` dagegenrechnen, sonst bleibt die Serie auf halber Strecke stehen.
+
+Guenstigere Alternativen im Katalog (mit `generate_image(get_cost: true)` preflighten):
+`z_image` (Tongyi-MAI) ~0,15 Credits, `soul_location` ~0,12 Credits. Beide koennen 9:16.
+ACHTUNG: `z_image` ist als "stylized" beschrieben und wurde fuer diesen Kanal **nie
+visuell gegen nano_banana geprueft** — vor einem Wechsel ein Testbild mit identischem
+Prompt rendern und wirklich ansehen, sonst faellt der Look aus der Reihe der ersten 31
+Videos.
+
+**Bildtransfer in den Chat (Proof-Frames):** Die base64-Ausgabe von `sandbox_exec` wird bei
+ca. 2000 Zeichen abgeschnitten. Ein 150px-JPEG hat ~4200 Zeichen base64, muss also in
+Stuecken geholt werden (`cut -c1-1400`, `cut -c1401-2800`, ...) und lokal wieder
+zusammengesetzt werden. Danach ZWINGEND `md5sum` gegen die Sandbox pruefen — beim
+Zusammensetzen von Hand passieren Fehler, und ein falsch zusammengesetztes Bild sieht
+trotzdem wie ein Bild aus.
 
 ---
 
