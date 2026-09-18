@@ -79,8 +79,13 @@ voice_type: "preset"
 voice_id: "30fc8796-ceb6-4a66-b3a7-4a145ef7f346"   # Preset "Arthur", tiefe erzählende Stimme
 prompt: "<komplettes Skript inkl. CTA-Satz am Ende>"
 ```
-Kosten: sehr günstig (~0,5–1 Credit für ein komplettes ~85s-Skript, im Gegensatz zu
-ElevenLabs' ~950 Credits pro Take).
+**Kosten: ~7,6–8,1 Credits pro Take** (belegt durch die Transaktionsliste, 18.09.2026:
+drei Takes à -7,6 / -8,0 / -8,1). Die fruehere Angabe "0,5-1 Credit" in diesem Dokument
+war FALSCH und hat zu einer massiven Fehlplanung gefuehrt. Das Voiceover ist der
+teuerste Einzelposten eines Videos — teurer als alle acht Bilder zusammen, wenn man
+nano_banana_2 nimmt. Ein verworfener Take (z. B. wegen einer Whisper-Verhoerung, Regel 3e)
+kostet volle ~8 Credits, also den Text lieber einmal mehr gegenlesen als einmal mehr
+generieren.
 
 Falls das Skript ein separates "Hook" (0–3s) UND einen eigenen "Voiceover"-Text hat, die
 sich am Anfang teilweise überschneiden (kam bei Skript 5 vor): den Hook-Satz als
@@ -495,19 +500,39 @@ durch.
 
 ---
 
-### 3.5 Bildkosten und Modellwahl (Stand 18.09.2026)
+### 3.5 Kosten pro Video und Modellwahl (Stand 18.09.2026, aus der Transaktionsliste)
 
-`nano_banana_2` kostet **~2,45 Credits pro Bild**, also ~19,6 Credits fuer ein Video mit 8
-Szenen (plus ~0,3 fuer das Voiceover). Bei einem Lite-Plan-Guthaben von ~75 Credits reicht
-das fuer knapp vier Videos. Vor dem Start einer Serie: `balance` abfragen und
-`anzahl_videos * 20` dagegenrechnen, sonst bleibt die Serie auf halber Strecke stehen.
+**Belegte Einzelpreise** — nicht geschaetzt, sondern aus `transactions` abgelesen:
 
-Guenstigere Alternativen im Katalog (mit `generate_image(get_cost: true)` preflighten):
-`z_image` (Tongyi-MAI) ~0,15 Credits, `soul_location` ~0,12 Credits. Beide koennen 9:16.
-ACHTUNG: `z_image` ist als "stylized" beschrieben und wurde fuer diesen Kanal **nie
-visuell gegen nano_banana geprueft** — vor einem Wechsel ein Testbild mit identischem
-Prompt rendern und wirklich ansehen, sonst faellt der Look aus der Reihe der ersten 31
-Videos.
+| Posten | Credits |
+|---|---|
+| Seed Audio 1.0 (ein Voiceover, ~80 s) | **7,6 – 8,1** |
+| Nano Banana Pro, 1 Bild | **2,0** |
+| Nano Banana 2, 1 Bild | **1,5** |
+| Nano Banana (ohne Zusatz), 1 Bild | 1,0 (Preflight) |
+| Nano Banana 2 Lite, 1 Bild | 1,0 (Preflight) |
+| Z Image, 1 Bild | 0,15 |
+
+**Ein fertiges Video mit 8 Szenen kostet damit:**
+- mit Nano Banana Pro: 8 x 2,0 + 8 = **24 Credits**
+- mit Nano Banana 2: 8 x 1,5 + 8 = **20 Credits**
+
+**Rechne das Voiceover immer mit.** Der haeufigste Planungsfehler ist, die Gesamtkosten
+durch die Bildanzahl zu teilen und das Ergebnis fuer den Bildpreis zu halten — dabei
+kommen ~2,5-3,0 pro Bild heraus, was niemandem entspricht. Das Voiceover steckt mit drin.
+
+**Modellwahl:** `nano_banana_pro` liefert die besten Bilder und kostet nur 0,5 Credits
+mehr pro Bild als `nano_banana_2`, also 4 Credits pro Video — bei 24 Credits Gesamtkosten
+ist das der falsche Ort zum Sparen. Pro ist die Empfehlung.
+
+**Wichtig zur Modellkontrolle:** Das `model`-Feld im Ergebnis von `jobs_wait` ist
+UNZUVERLAESSIG. Bei einer Anforderung von `nano_banana_pro` meldet es `nano_banana_2`,
+bei `nano_banana_2` meldet es `nano_banana_flash`. Die Abrechnung zeigt aber das
+angeforderte Modell zum korrekten Preis ("Nano Banana Pro -2"). Das angeforderte Modell
+wird also tatsaechlich benutzt; nur das Metadatenfeld luegt. Im Zweifel `transactions`
+pruefen, nicht das Job-Ergebnis.
+
+**Vor dem Start einer Serie:** `balance` abfragen und `anzahl_videos * 24` dagegenrechnen.
 
 **Bildtransfer in den Chat (Proof-Frames):** Die base64-Ausgabe von `sandbox_exec` wird bei
 ca. 2000 Zeichen abgeschnitten. Ein 150px-JPEG hat ~4200 Zeichen base64, muss also in
