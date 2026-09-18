@@ -263,6 +263,23 @@ bewährt haben:
     gefangen. Als Sicherheitsnetz nach dem Render: `ffmpeg -vf
     "select='gte(scene,0.08)',metadata=print"` liefert die Schnittzeitpunkte, daraus die
     Szenendauern berechnen — ohne `timing.json` aus der (recycelten) Sandbox.
+3e. **Das Transkript IMMER vor dem Render lesen — die Captions werden eingebrannt.**
+    Whisper (`base.en`) verhoert sich gelegentlich, und der Fehler landet dann als
+    Untertitel im fertigen Video, wo er nicht mehr korrigierbar ist. Real aufgetreten bei
+    Skript 33: "What remains is a real series of murders" wurde zu "What parties of
+    murders" (ganze Wortgruppe verschluckt, dadurch zusaetzlich `ANCHOR_NOT_FOUND:remains`),
+    und "Sheet music" wurde zu "Cheat music". Deshalb die Pipeline ZWEITEILEN: erst nur
+    `python3 align.py` laufen lassen und
+    `python3 -c "import json;print(' '.join(c['text'] for c in json.load(open('timing.json'))['captions']))"`
+    ausgeben, das Transkript gegen den Skripttext lesen, und ERST DANN rendern.
+    Zwei Reparaturwege:
+    - **Einzelnes falsches Wort** (gleiche Silbenzahl, 1:1): `WORD_FIXES`-Dict in `align.py`
+      direkt nach dem Aufbau der `words`-Liste anwenden. Ersetzt nur den Text, laesst die
+      Zeitstempel unangetastet, kostet nichts. Vorlage siehe `align.py` aus Skript 33.
+    - **Ganze Wortgruppe verschluckt**: nicht flicken, sondern den Satz im Skript umformu-
+      lieren und das Voiceover neu erzeugen (~0,3 Credits). Ein Flicken waere hier eine
+      Luege im Bild, weil Stimme und Untertitel dann Verschiedenes sagen.
+
 4. Bei `ANCHOR_NOT_FOUND` (Fehler bricht `align.py` mit `set -e` sauber ab, bevor
    irgendetwas gerendert/hochgeladen wird): NICHT von vorne anfangen. Nur die betroffene
    Zeile in der bereits geschriebenen `align.py` in der Sandbox per `sed -i` patchen
