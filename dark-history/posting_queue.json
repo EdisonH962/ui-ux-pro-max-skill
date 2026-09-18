@@ -123,11 +123,13 @@
     },
     {
       "script": "28 - The Bell Witch (1817)",
-      "status": "pending",
+      "status": "posted",
       "video_url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3G8m1bxNBqhjlyBCY2gFUlzpzbo/5ab2fec6-3807-4379-9557-5b7d151ffc27.mp4",
       "title": "The Bell Witch 1817 — A Tennessee family said something invisible lived in their house for four years. #darkhistory #bellwitch #mystery",
       "music_sound_id": "6577640999927941893",
-      "duration_sec": 72.28
+      "duration_sec": 72.28,
+      "publish_id": "v_pub_url~v2.7686659672111204385",
+      "posted_at": "2026-09-18T00:09:00Z"
     },
     {
       "script": "29 - The Winchester House (1884)",
