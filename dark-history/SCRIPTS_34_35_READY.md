@@ -23,6 +23,27 @@ zusaetzlich Regel 3e beachten (Transkript vor dem Render lesen).
 
 ---
 
+## Hook-Regel (ab 20.09.2026)
+
+**Der erste Satz darf NICHT mit einer Jahreszahl anfangen.** Die Skripte 16-30 fuehren mit
+der Pointe ("It burned in thirty-two seconds. Nobody agrees on why." / "He confessed to
+twenty-seven murders. Several victims turned up alive."). Die Skripte 31-35 fingen in der
+ersten Fassung alle mit "In nineteen XX ..." an — damit gehen die ersten 1,5 Sekunden fuer
+eine Zahl drauf, und die erste eingeblendete Caption zeigt woertlich nur "In 1919,".
+Genau in diesem Fenster entscheidet TikTok ueber die Ausspielung.
+
+Die Jahreszahl muss im gesprochenen Text gar nicht vorkommen: sie steht ab Frame 1 im
+Titel-Overlay ("THE BLACK DAHLIA 1947") und in der Beschreibung, die Suchbegriff-Regel
+des Kanals ist also erfuellt.
+
+Aufbau des ersten Beats: **harte Tatsache, dann der Widerspruch.** Zwei kurze Saetze,
+keine Einleitung, kein Datum, kein "In diesem Video".
+
+Skript 34 und 35 wurden am 20.09. entsprechend umgeschrieben; die Anker wurden danach
+neu simuliert (kuerzeste Szene 8,5 s bzw. 8,8 s, alle sieben Anker sitzen).
+
+---
+
 ## Skript 34 — The Wallace Case (1931)
 
 - **TITLE-Overlay:** `THE WALLACE CASE 1931`
@@ -34,7 +55,7 @@ zusaetzlich Regel 3e beachten (Transkript vor dem Render lesen).
 
 **Voiceover-Text (ein Stueck, inkl. CTA):**
 
-> In nineteen thirty-one a man took a message that had been left for him at his chess club. It sent him to an address that did not exist. The caller gave a name and a street in a part of Liverpool he did not know. He was an insurance agent. A new customer was worth the trip. The following evening William Herbert Wallace rode three trams across the city, asking directions from strangers, looking for a street nobody could point him to. He returned home after eight o'clock. His wife Julia was dead in the front parlour. He was tried for her murder and convicted. Then the appeal court did something it had never done before. It overturned a jury on the grounds that the evidence simply did not support the verdict. The timing was the whole case. If Wallace made that call himself, from a box near his own house, he had minutes to do everything the prosecution claimed. Crime writers have argued about it for ninety years. Raymond Chandler called it unbeatable. Dorothy Sayers wrote about it. Nobody has solved it. The records still exist. The message, the tram conductors, the street that was never there. If this one got you, follow for more stories like it, and leave a like.
+> A stranger left a message for him at his chess club. It sent him across Liverpool to an address that did not exist. While he was out looking for it, his wife was killed. The caller gave a name and a street in a part of the city he did not know. He was an insurance agent. A new customer was worth the trip. The following evening William Herbert Wallace rode three trams across town, asking directions from strangers, looking for a street nobody could point him to. He returned home after eight o'clock. Julia was dead in the front parlour. He was tried for her murder and convicted. Then the appeal court did something it had never done before. It overturned a jury on the grounds that the evidence simply did not support the verdict. The timing was the whole case. If Wallace made that call himself, from a box near his own house, he had minutes to do everything the prosecution claimed. Crime writers have argued about it for ninety years. Raymond Chandler called it unbeatable. Dorothy Sayers wrote about it. Nobody has solved it. The records still exist. The message, the tram conductors, the street that was never there. If this one got you, follow for more stories like it, and leave a like.
 
 **Bild-Prompts** (jeweils mit Suffix `, cinematic photorealistic still, muted desaturated colors, subtle film grain, ominous true-crime documentary mood, no people`):
 
@@ -60,7 +81,7 @@ zusaetzlich Regel 3e beachten (Transkript vor dem Render lesen).
 
 **Voiceover-Text (ein Stueck, inkl. CTA):**
 
-> In nineteen forty-seven a murder in Los Angeles became so famous that the victim is still known by a nickname the newspapers invented for her. Elizabeth Short was twenty-two, from Massachusetts, and had been in California less than a year, moving between rented rooms and looking for work. Police were called to a vacant lot on a January morning. What they found there is not something this video is going to describe. The press named her the Black Dahlia, after a film that was playing that season. The nickname travelled faster than any fact about her did. A newspaper editor took a phone call from a man claiming to be the killer. Days later her birth certificate and address book arrived in the post, wiped clean. Detectives interviewed hundreds of people. More than fifty men and women walked into stations and confessed. Every one of them was ruled out. The file is still technically open at the Los Angeles Police Department. It is one of the oldest unsolved cases the city holds. She is remembered by a name she never used, for the last day of a life nobody wrote down. If this one got you, follow for more stories like it, and leave a like.
+> Fifty people confessed to this murder. Every single one of them was ruled out. Nearly eighty years later the case is still open. Elizabeth Short was twenty-two, from Massachusetts, and had been in California less than a year, moving between rented rooms and looking for work. Police were called to a vacant lot on a January morning. What they found there is not something this video is going to describe. The press named her the Black Dahlia, after a film that was playing that season. The nickname travelled faster than any fact about her did. A newspaper editor took a phone call from a man claiming to be the killer. Days later her birth certificate and address book arrived in the post, wiped clean. Detectives interviewed hundreds of people. More than fifty men and women walked into stations and confessed. Not one of them held up. The file is still technically open at the Los Angeles Police Department. It is one of the oldest unsolved cases the city holds. She is remembered by a name she never used, for the last day of a life nobody wrote down. If this one got you, follow for more stories like it, and leave a like.
 
 **Bild-Prompts** (gleiches Suffix wie oben):
 
