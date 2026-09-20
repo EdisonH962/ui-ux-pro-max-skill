@@ -494,6 +494,39 @@ tiktok_publish(connector_id, publish_session_id, mode, media_type, title,
 tiktok_publish_status(connector_id, publish_id)   # Status "PROCESSING_DOWNLOAD" ist normal,
                                                     # TikTok braucht ein paar Minuten
 ```
+### 6.5 BLOCKER ab 20.09.2026: tiktok_publish verlangt ein publish_token
+
+Am 20.09.2026 hat sich das Verhalten von `tiktok_prepare_publish` geaendert. Bis
+einschliesslich 19.09. lieferte es die Anweisung "On clients without widgets, collect
+everything in chat ... Then call tiktok_publish". Seit dem 20.09. liefert dieselbe
+Anfrage stattdessen:
+
+> "The publish-form widget collects the user's explicit choices, preview review and
+> agreement. Ask the user to finish the form; do NOT call tiktok_publish yourself ...
+> Publication requires authorization supplied privately to the widget. Clients without
+> MCP Apps cannot publish."
+
+Und `tiktok_publish` bricht ab mit:
+
+> `Input validation error: publish_token: Invalid input: expected string, received undefined`
+
+Das `publish_token` ist im veroeffentlichten Tool-Schema NICHT enthalten (per ToolSearch
+geprueft) — Schema und serverseitige Validierung sind auseinandergelaufen. Das Token wird
+nur vom Publish-Widget vergeben, das eine MCP-Apps-faehige Oberflaeche braucht. Eine
+reine CLI-/Remote-Session kann es nicht erzeugen, und es darf auch nicht erfunden werden.
+
+**Folge:** Die automatische taegliche Veroeffentlichung funktioniert so nicht mehr. Der
+Trigger kann weiterhin die Queue lesen und den naechsten Eintrag ermitteln, aber der
+letzte Schritt muss von Hand im Higgsfield-Widget (Claude-Desktop-App oder claude.ai)
+erfolgen. Betroffene Eintraege bleiben auf `status: "pending"` — NICHT auf "posted"
+setzen, sonst faellt ein Video still aus der Warteschlange.
+
+**Zu pruefen, wenn es wieder klemmt:** ob `tiktok_publish` inzwischen wieder ohne Token
+akzeptiert wird (einfach aufrufen, der Fehler ist harmlos und verbraucht kein Publish-
+Kontingent — laut Tool-Beschreibung zaehlen nur von TikTok angenommene Posts).
+
+---
+
 `music_sound_volume: 15` entspricht der Vorgabe "max. 15% Lautstärke unter der Stimme"
 aus der Original-Checkliste; `video_original_sound_volume: 100` lässt die Stimme voll
 durch.
