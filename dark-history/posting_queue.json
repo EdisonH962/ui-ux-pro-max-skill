@@ -155,29 +155,32 @@
     {
       "script": "31 - The Mona Lisa Theft (1911)",
       "status": "pending",
-      "video_url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3G8m1bxNBqhjlyBCY2gFUlzpzbo/6eefdaf8-4715-492d-9b88-182b11a42f5d.mp4",
+      "video_url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3G8m1bxNBqhjlyBCY2gFUlzpzbo/b6af2cdf-2383-432d-b19b-59f38b6d7dd3.mp4",
       "title": "Mona Lisa Theft 1911 — For two years people queued to stare at an empty wall. #truestory #truecrime #truehistory",
       "music_sound_id": "6595184426152364801",
       "duration_sec": 84.38,
-      "hook_overlay": "HE WALKED OUT OF THE LOUVRE WITH IT UNDER HIS COAT"
+      "hook_overlay": "HE WALKED OUT OF THE LOUVRE WITH IT UNDER HIS COAT",
+      "size_mb": 18
     },
     {
       "script": "32 - Dr. Crippen (1910)",
       "status": "pending",
-      "video_url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3G8m1bxNBqhjlyBCY2gFUlzpzbo/8cdd90e4-6e3a-4b9f-ad48-2e73e6807329.mp4",
+      "video_url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3G8m1bxNBqhjlyBCY2gFUlzpzbo/08fb82f3-fae2-4a56-9511-ce141a319411.mp4",
       "title": "Dr Crippen 1910 — He almost escaped. A telegram from a ship's captain stopped him. #truestory #truecrime #truehistory",
       "music_sound_id": "6739957724429158401",
       "duration_sec": 73.6,
-      "hook_overlay": "ONE OF THE TWO PASSENGERS WAS NOT A BOY"
+      "hook_overlay": "ONE OF THE TWO PASSENGERS WAS NOT A BOY",
+      "size_mb": 14
     },
     {
       "script": "33 - The Axeman of New Orleans (1919)",
       "status": "pending",
-      "video_url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3G8m1bxNBqhjlyBCY2gFUlzpzbo/c6474372-541a-4f1e-815f-21d74109a8f2.mp4",
+      "video_url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3G8m1bxNBqhjlyBCY2gFUlzpzbo/95ec85bf-86f4-4843-914e-c8918ade30f2.mp4",
       "title": "The Axeman of New Orleans 1919 — He promised to spare any house playing jazz. The city played all night. #truestory #truecrime #truehistory",
       "music_sound_id": "6739976214024292354",
       "duration_sec": 84.78,
-      "hook_overlay": "HE PROMISED TO SPARE ANY HOUSE PLAYING JAZZ"
+      "hook_overlay": "HE PROMISED TO SPARE ANY HOUSE PLAYING JAZZ",
+      "size_mb": 19
     }
   ]
 }
