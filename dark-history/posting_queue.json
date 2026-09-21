@@ -143,11 +143,14 @@
     },
     {
       "script": "30 - The Antikythera Mechanism (1901)",
-      "status": "pending",
+      "status": "posted",
       "video_url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3G8m1bxNBqhjlyBCY2gFUlzpzbo/3f066e90-7d5c-452c-9f34-6f053335f248.mp4",
       "title": "Antikythera Mechanism 1901 — A lump of corroded bronze turned out to be a 2000-year-old computer. #truestory #truecrime #truehistory",
       "music_sound_id": "6886943025189095425",
-      "duration_sec": 76.5
+      "duration_sec": 76.5,
+      "posted_at": "2026-09-21T22:10:42Z",
+      "posted_manually": true,
+      "note": "Manuell im Higgsfield-Widget veroeffentlicht (tiktok_publish steht der Session seit 20.09. nicht mehr zur Verfuegung), daher keine publish_id."
     },
     {
       "script": "31 - The Mona Lisa Theft (1911)",
