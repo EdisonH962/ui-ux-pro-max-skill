@@ -154,13 +154,16 @@
     },
     {
       "script": "31 - The Mona Lisa Theft (1911)",
-      "status": "pending",
+      "status": "posted",
       "video_url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3G8m1bxNBqhjlyBCY2gFUlzpzbo/b6af2cdf-2383-432d-b19b-59f38b6d7dd3.mp4",
       "title": "Mona Lisa Theft 1911 — For two years people queued to stare at an empty wall. #truestory #truecrime #truehistory",
       "music_sound_id": "6595184426152364801",
       "duration_sec": 84.38,
       "hook_overlay": "HE WALKED OUT OF THE LOUVRE WITH IT UNDER HIS COAT",
-      "size_mb": 18
+      "size_mb": 18,
+      "posted_at": "2026-09-22T09:24:17Z",
+      "posted_manually": true,
+      "note": "Manuell gepostet (tiktok_publish steht der Session nicht zur Verfuegung), keine publish_id."
     },
     {
       "script": "32 - Dr. Crippen (1910)",
