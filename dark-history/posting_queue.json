@@ -167,13 +167,16 @@
     },
     {
       "script": "32 - Dr. Crippen (1910)",
-      "status": "pending",
+      "status": "posted",
       "video_url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3G8m1bxNBqhjlyBCY2gFUlzpzbo/08fb82f3-fae2-4a56-9511-ce141a319411.mp4",
       "title": "Dr Crippen 1910 — He almost escaped. A telegram from a ship's captain stopped him. #truestory #truecrime #truehistory",
       "music_sound_id": "6739957724429158401",
       "duration_sec": 73.6,
       "hook_overlay": "ONE OF THE TWO PASSENGERS WAS NOT A BOY",
-      "size_mb": 14
+      "size_mb": 14,
+      "posted_at": "2026-09-30T16:57:44Z",
+      "posted_manually": true,
+      "note": "Manuell gepostet (tiktok_publish steht der Session nicht zur Verfuegung), keine publish_id."
     },
     {
       "script": "33 - The Axeman of New Orleans (1919)",
