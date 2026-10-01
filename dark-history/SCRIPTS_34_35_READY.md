@@ -98,3 +98,20 @@ neu simuliert (kuerzeste Szene 8,5 s bzw. 8,8 s, alle sieben Anker sitzen).
 bewusst nichts vom Tatort oder vom Opfer — das ist Absicht und sollte so bleiben, sowohl
 wegen der Kanalregel "kein Bildmaterial mit Opfern oder Tatorten" als auch wegen der
 TikTok-Moderation. Keines der acht Bilder zeigt einen Tatort.
+
+---
+
+## Stand 01.10.2026: beide produziert (kostenlos)
+
+Beide Skripte wurden mit der Gratis-Pipeline (Abschnitt 8 der Backup-Datei) gebaut und
+stehen in der Queue. Abweichungen vom Text oben:
+
+- **Skript 34:** "across Liverpool" -> "to the other side of the city" (Piper/Whisper-Problem),
+  "rode" -> "took", "after eight o'clock" -> "just after eight", "claimed" -> "said he did",
+  "wrote about it" -> "studied it", "appeal court" -> "Court of Criminal Appeal",
+  "The records still exist" -> "Everything is still on record".
+  Anker: `["caller","evening","returned","criminal","timing","writers","everything"]`.
+- **Skript 35:** Faktenkorrektur "in California less than a year" -> "in Los Angeles less
+  than a year" (sie lebte 1943 bereits in Kalifornien, kam im Juli 1946 nach L.A.);
+  "a name she never used" -> "a name the newspapers gave her" (umstritten).
+  Hook-Tafel: `FIFTY PEOPLE CONFESSED. EVERY ONE WAS RULED OUT.`
