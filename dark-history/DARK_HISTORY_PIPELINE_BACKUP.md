@@ -608,3 +608,46 @@ trotzdem wie ein Bild aus.
 - Higgsfield Voice-Preset "Arthur": `30fc8796-ceb6-4a66-b3a7-4a145ef7f346`
 - Bildmodell: `nano_banana_2` (Fallback-Routing manchmal auf `nano_banana_flash`)
 - Sprachmodell: `seed_audio` (ByteDance Seed Audio 1.0)
+
+---
+
+## 8. Gratis-Pipeline (ab Skript 34, 01.10.2026) — 0 Credits
+
+**Bilder:** Nutzer erzeugt die 8 Szenen selbst mit ChatGPT (Prompts aus der Skriptdatei),
+schickt sie im Chat. Upload per `media_upload` + `curl -X PUT -H "Content-Type: image/png"
+-H "If-None-Match: *"` vom lokalen Rechner (upload.higgsfield.ai ist erreichbar, CloudFront-
+Download dagegen gesperrt). ChatGPT-Bilder kommen mit 941x1672 — in der Sandbox per
+`convert -filter Lanczos -resize 1080x1920^ -extent 1080x1920 -unsharp 0x0.75+0.75+0.008`
+auf Format bringen.
+
+**Stimme:** Piper TTS statt Seed Audio:
+`pip install piper-tts`, Modell `en_US-ryan-high.onnx` + Config **`ryan.onnx.json`**
+(Name muss `<modell>.onnx.json` sein) von
+`huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/ryan/high/`.
+`python3 -m piper --model ryan.onnx --length-scale 1.6 --output_file vr.wav < script.txt`
+→ ~2,4 Woerter/s, ~87 s fuer ~205 Woerter.
+
+**Piper ist nicht deterministisch** — derselbe Text wird bei jedem Lauf leicht anders
+gesprochen, Whisper hoert dadurch jedes Mal andere Fehler ("trans" statt "trams",
+"No body" statt "Nobody", "he appealed court" statt "the appeal court").
+Deshalb **align.py v2**: Untertiteltext kommt aus `script.txt`, Whisper liefert nur
+Zeitstempel. Abgleich per `difflib.SequenceMatcher` auf normalisierten Woertern;
+bei Abweichungen werden die Skriptwoerter gleichmaessig auf das Zeitfenster der
+Whisper-Woerter verteilt. Das Log zeigt jede Korrektur als `FIX replace ...`.
+Ergebnis: Captions immer wortgleich mit Skript, inkl. Kommas; WORD_FIXES entfaellt.
+
+Anker trotzdem robust waehlen — bei Skript 34 brach "appeal" (Piper: "appealed")
+und "records" (Piper: "record"); ersetzt durch "criminal" und "everything".
+
+**Sandbox:** Wird nach Ende eines Background-Jobs schnell recycelt. **Den GANZEN Ablauf
+(Download → Piper → align → Render → Re-Encode → PUT) in EINEN Background-Job packen.**
+Polling-Aufrufe unter 60 s halten (Tool-Timeout ist hart 60 s, egal was
+`timeout_seconds` sagt).
+
+**Re-Encode:** `-preset slow -crf 27 -maxrate 4000k -bufsize 8000k` → 19 MB bei 87 s,
+SSIM 0,961. (crf 24 ergab 30 MB — die ChatGPT-Bilder mit Unsharp kosten mehr Bitrate.)
+SSIM-Messung NICHT mit `-v error`, sonst wird der Wert verschluckt.
+
+**Proof ohne Base64:** Frame per PIL in der Sandbox numerisch pruefen (weisse Pixel
+und x-Spanne in Titel-/Hook-/Caption-Zone, Helligkeitssprung an der Bandkante y=560
+und y=1180). Base64 von Hand abtippen ist unzuverlaessig — nicht machen.

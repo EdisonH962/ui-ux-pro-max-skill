@@ -187,6 +187,17 @@
       "duration_sec": 84.78,
       "hook_overlay": "HE PROMISED TO SPARE ANY HOUSE PLAYING JAZZ",
       "size_mb": 19
+    },
+    {
+      "script": "34 - The Wallace Case (1931)",
+      "status": "pending",
+      "video_url": "https://d2ol7oe51mr4n9.cloudfront.net/user_3G8m1bxNBqhjlyBCY2gFUlzpzbo/b2aeb4ca-4988-483a-b39e-442fd6c90b2f.mp4",
+      "title": "The Wallace Case 1931 — A phone call sent him to an address that did not exist. #truestory #truecrime #truehistory",
+      "music_sound_id": "6859381931478353922",
+      "duration_sec": 87.25,
+      "hook_overlay": "IT SENT HIM TO AN ADDRESS THAT DID NOT EXIST",
+      "size_mb": 19,
+      "production": "free: ChatGPT images (user-supplied) + Piper TTS en_US-ryan-high, 0 credits"
     }
   ]
 }
